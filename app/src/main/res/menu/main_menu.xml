@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/followingPosts"
+        android:icon="@drawable/ic_news"
+        android:orderInCategory="3"
+        android:title="@string/following_post_menu_item"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/chatIcon"
+        android:icon="@drawable/ic_chat_black_24dp"
+        android:orderInCategory="2"
+        android:title="Chat"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_search"
+        android:orderInCategory="1"
+        android:title="@string/search_menu_item"
+        app:showAsAction="ifRoom" />
+
+</menu>
+
