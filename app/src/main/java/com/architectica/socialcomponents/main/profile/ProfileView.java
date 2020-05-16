@@ -54,6 +54,8 @@ public interface ProfileView extends BaseView {
 
     void setSkill(String skill);
 
+    void setCredits(long credits);
+
     void setProfilePhoto(String photoUrl);
 
     void setDefaultProfilePhoto();

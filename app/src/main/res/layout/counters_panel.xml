@@ -108,4 +108,24 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/needMentors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/intrinsic_padding"
+        android:paddingBottom="@dimen/intrinsic_padding"
+        android:paddingRight="@dimen/intrinsic_padding"
+        android:layout_marginRight="15dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/needMentorsIcon"
+            app:srcCompat="@drawable/ic_check_circle_black_24dp"
+            android:layout_width="30dp"
+            android:layout_height="14dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
 </LinearLayout>

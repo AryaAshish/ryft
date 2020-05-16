@@ -19,14 +19,18 @@ package com.architectica.socialcomponents.utils;
 import android.content.Context;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import com.architectica.socialcomponents.Constants;
+
+import static android.webkit.MimeTypeMap.getFileExtensionFromUrl;
 
 /**
  * Created by Kristina on 8/8/15.
  */
 public class ValidationUtil {
-    private static final String [] IMAGE_TYPE = new String[]{"jpg", "png", "jpeg", "bmp", "jp2", "psd", "tif", "gif"};
+    private static final String [] IMAGE_TYPE = new String[]{"jpg", "png", "jpeg", "bmp", "jp2", "psd", "tif", "gif", "mp4", "3gp", "flv", "mov", "ogv", "webm", "hls"};
 
     public static boolean isEmailValid(String email) {
         String stricterFilterString = "[A-Z0-9a-z\\._%+-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}";
@@ -73,7 +77,16 @@ public class ValidationUtil {
         String mimeType = context.getContentResolver().getType(uri);
 
         if (mimeType != null) {
-            return mimeType.contains("image");
+
+            Log.i("type",mimeType);
+
+            if(mimeType.contains("image") || mimeType.contains("video")){
+
+                return true;
+
+            }
+
+            return false;
         } else {
             String filenameArray[] = uri.getPath().split("\\.");
             String extension = filenameArray[filenameArray.length - 1];
@@ -88,6 +101,15 @@ public class ValidationUtil {
         }
 
         return false;
+    }
+
+    public static String getMimeType(Uri uri, Context context) {
+
+        String type = context.getContentResolver().getType(uri);
+
+        //Log.i("mimetype",type);
+
+        return type;
     }
 
     public static boolean hasExtension(String path){

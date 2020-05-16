@@ -20,6 +20,7 @@ package com.architectica.socialcomponents.main.postDetails;
 import android.animation.Animator;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -45,8 +46,11 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.architectica.socialcomponents.main.interactors.PostInteractor;
+import com.architectica.socialcomponents.main.login.LoginActivity;
+import com.architectica.socialcomponents.managers.DatabaseHelper;
 import com.architectica.socialcomponents.managers.ProfileManager;
 import com.architectica.socialcomponents.model.Profile;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -65,10 +69,26 @@ import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.utils.FormatterUtil;
 import com.architectica.socialcomponents.utils.GlideApp;
 import com.architectica.socialcomponents.utils.ImageUtil;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.StorageReference;
 
 
 import java.util.List;
-
 
 
 public class PostDetailsActivity extends BaseActivity<PostDetailsView, PostDetailsPresenter> implements PostDetailsView, EditCommentDialog.CommentDialogCallback {
@@ -92,12 +112,14 @@ public class PostDetailsActivity extends BaseActivity<PostDetailsView, PostDetai
     private ImageView authorImageView;
     private ProgressBar progressBar;
     private ImageView postImageView;
+    private PlayerView postVideoView;
     private TextView titleTextView;
     private TextView descriptionEditText;
     private ProgressBar commentsProgressBar;
     private RecyclerView commentsRecyclerView;
     private TextView warningCommentsTextView;
 
+    private SimpleExoPlayer exoPlayer;
 
     private MenuItem complainActionMenuItem;
     private MenuItem editActionMenuItem;
@@ -136,6 +158,7 @@ public class PostDetailsActivity extends BaseActivity<PostDetailsView, PostDetai
         userskill = findViewById(R.id.userInfo);
         descriptionEditText = findViewById(R.id.descriptionEditText);
         postImageView = findViewById(R.id.postImageView);
+        postVideoView = findViewById(R.id.postVideoView);
         progressBar = findViewById(R.id.progressBar);
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView);
         scrollView = findViewById(R.id.scrollView);
@@ -353,9 +376,15 @@ public class PostDetailsActivity extends BaseActivity<PostDetailsView, PostDetai
 
     @Override
     public void openProfileActivity(String userId, View view) {
-        Intent intent = new Intent(PostDetailsActivity.this, ProfileActivity.class);
-        intent.putExtra(ProfileActivity.USER_ID_EXTRA_KEY, userId);
-        startActivity(intent);
+
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            Intent intent = new Intent(this, ProfileActivity.class);
+            intent.putExtra(ProfileActivity.USER_ID_EXTRA_KEY, userId);
+            startActivity(intent);
+        }else {
+            Intent intent=new Intent(this,LoginActivity.class);
+            startActivity(intent);
+        }
 
 //        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && view != null) {
 //
@@ -379,21 +408,124 @@ descriptionEditText.setText(description);
     }
 
     @Override
-    public void loadPostDetailImage(String imageTitle) {
+    public void loadPostDetailImage(String imageTitle, String contentType) {
 
         if (imageTitle.equals("")){
             imageContainer.setVisibility(View.GONE);
-//            postImageView.setImageResource(R.drawable.noimage);
+            postVideoView.setVisibility(View.GONE);
+            //postImageView.setImageResource(R.drawable.noimage);
 
         }
         else {
 
-            postManager.loadImageMediumSize(GlideApp.with(this), imageTitle, postImageView, () -> {
-                scheduleStartPostponedTransition(postImageView);
-                progressBar.setVisibility(View.GONE);
-            });
+            if(contentType != null){
+
+                if (contentType.contains("video")){
+
+                    postImageView.setVisibility(View.GONE);
+
+                    postVideoView.setVisibility(View.VISIBLE);
+
+                    loadVideo(imageTitle);
+
+                }
+                else{
+
+                    postVideoView.setVisibility(View.GONE);
+
+                    postImageView.setVisibility(View.VISIBLE);
+
+                    postManager.loadImageMediumSize(GlideApp.with(this), imageTitle, postImageView, () -> {
+                        scheduleStartPostponedTransition(postImageView);
+                        progressBar.setVisibility(View.GONE);
+                    });
+
+                }
+
+            }
+            else {
+
+                postVideoView.setVisibility(View.GONE);
+
+                postImageView.setVisibility(View.VISIBLE);
+
+                postManager.loadImageMediumSize(GlideApp.with(this), imageTitle, postImageView, () -> {
+                    scheduleStartPostponedTransition(postImageView);
+                    progressBar.setVisibility(View.GONE);
+                });
+
+
+            }
 
         }
+    }
+
+   /* private void loadVideo(String imageTitle){
+
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
+
+        StorageReference reference = databaseHelper.getOriginImageStorageRef(imageTitle);
+
+        reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+
+                //setThumbnail(postImageView,uri.toString());
+
+                postVideoView.setVideoURI(uri);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(getApplicationContext(), "Video loading failed", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }*/
+
+    private void loadVideo(String imageTitle){
+
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance(getApplicationContext());
+
+        StorageReference reference = databaseHelper.getOriginImageStorageRef(imageTitle);
+
+        reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+
+                //setThumbnail(postImageView,uri.toString());
+
+                //postVideoView.setVideoURI(uri);
+
+                try{
+
+                    BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter.Builder(getApplicationContext()).build();
+                    TrackSelector trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(bandwidthMeter));
+                    exoPlayer = ExoPlayerFactory.newSimpleInstance(getApplicationContext());
+                    DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory("posts");
+                    ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+
+                    MediaSource mediaSource = new ExtractorMediaSource(uri,dataSourceFactory,extractorsFactory,null,null);
+
+                    postVideoView.setPlayer(exoPlayer);
+                    exoPlayer.prepare(mediaSource);
+                    exoPlayer.setPlayWhenReady(false);
+
+                }
+                catch (Exception e){
+
+                    Toast.makeText(getApplicationContext(), "exo player exception", Toast.LENGTH_SHORT).show();
+
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(getApplicationContext(), "Video loading failed", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
@@ -637,5 +769,9 @@ descriptionEditText.setText(description);
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //POST_TYPE = "post";
+    }
 }

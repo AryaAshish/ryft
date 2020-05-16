@@ -16,50 +16,67 @@
 
 package com.architectica.socialcomponents.main.main;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
-import com.architectica.socialcomponents.main.ChatsList.ChatsListActivity;
+import com.architectica.socialcomponents.main.Rewards.RewardsActivity;
 import com.architectica.socialcomponents.main.login.LoginActivity;
+import com.architectica.socialcomponents.main.main.Chats.ChatsFragment;
+import com.architectica.socialcomponents.main.main.GoogleNews.GoogleNewsFragment;
+import com.architectica.socialcomponents.main.main.Profile.ProfileActivity;
+import com.architectica.socialcomponents.main.main.Projects.ProjectsFragment;
 import com.architectica.socialcomponents.utils.GoogleApiHelper;
 import com.architectica.socialcomponents.utils.LogoutHelper;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.main.base.BaseActivity;
 import com.architectica.socialcomponents.main.main.Home.HomeFragment;
-import com.architectica.socialcomponents.main.main.Notifications.NotificationsFragment;
-import com.architectica.socialcomponents.main.main.Profile.ProfileFragment;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 public class MainActivity extends BaseActivity<MainView, MainPresenter> implements MainView,GoogleApiClient.OnConnectionFailedListener,NavigationView.OnNavigationItemSelectedListener {
 
     private static final String SELECTED_ITEM = "arg_selected_item";
+
+    //public static String POST_TYPE = "post";
 
     private BottomNavigationView mBottomNav;
 
     private int mSelectedItem;
     DrawerLayout drawer;
 
+    String currentVersion, latestVersion;
+    Dialog dialog;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -75,7 +92,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         mBottomNav = (BottomNavigationView) findViewById(R.id.navigation);
 
 
-         drawer = findViewById(R.id.activity_main);
+        drawer = findViewById(R.id.activity_main);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -91,12 +108,21 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
                 selectFragment(item);
 
-
                 return true;
 
             }
 
         });
+
+        /*int backstack = getSupportFragmentManager().getBackStackEntryCount();
+
+        if (backstack > 0) {
+            getSupportFragmentManager().popBackStack();
+        } else {
+
+
+
+        }*/
 
         MenuItem selectedItem;
 
@@ -116,6 +142,97 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
     }
 
+    private void getCurrentVersion(){
+        PackageManager pm = this.getPackageManager();
+        PackageInfo pInfo = null;
+
+        try {
+            pInfo =  pm.getPackageInfo(this.getPackageName(),0);
+
+        } catch (PackageManager.NameNotFoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        currentVersion = pInfo.versionName;
+
+        new GetLatestVersion().execute();
+
+    }
+
+    private class GetLatestVersion extends AsyncTask<String, String, JSONObject> {
+
+        private ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected JSONObject doInBackground(String... params) {
+            try {
+                //It retrieves the latest version by scraping the content of current version from play store at runtime
+                Document doc = Jsoup.connect("appstoreurl").get();
+                Log.i("doc",doc.toString());
+                latestVersion = doc.getElementsByClass("htlgb").get(6).text();
+
+            }catch (Exception e){
+                e.printStackTrace();
+
+            }
+
+            return new JSONObject();
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject jsonObject) {
+            if(latestVersion!=null) {
+                if (!currentVersion.equalsIgnoreCase(latestVersion)){
+                    if(!isFinishing()){ //This would help to prevent Error : BinderProxy@45d459c0 is not valid; is your activity running? error
+                        showUpdateDialog();
+                    }
+                }
+            }
+            /*else{
+
+                //startApp();
+
+            }*/
+            super.onPostExecute(jsonObject);
+        }
+    }
+
+    private void showUpdateDialog(){
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("A New Update is Available");
+        builder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
+                        ("market://details?id=com.architectica.socialcomponents")));
+                dialog.dismiss();
+            }
+        });
+
+        /*builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                background.start();
+            }
+        });*/
+
+        builder.setCancelable(false);
+        dialog = builder.show();
+    }
+
+    /*private void startApp(){
+
+        MenuItem selectedItem = mBottomNav.getMenu().getItem(0);
+
+        selectFragment(selectedItem);
+
+    }*/
+
     private void selectFragment(MenuItem item) {
 
 
@@ -129,25 +246,26 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
                 break;
 
-
-            case R.id.menu_notifications:
+            case R.id.menu_projects:
 
                 if (checkAuthorization()) {
 
-                    frag = NotificationsFragment.newInstance();
+                    frag = ProjectsFragment.newInstance();
 
                 }
 
                 break;
 
-            case R.id.menu_profile:
-
+            case R.id.menu_chats:
                 if (checkAuthorization()) {
 
-                    frag = ProfileFragment.newInstance();
+                    frag = ChatsFragment.newInstance();
 
                 }
+                break;
 
+            case R.id.menu_google_news:
+                frag = GoogleNewsFragment.newInstance();
                 break;
 
         }
@@ -162,7 +280,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
-            ft.replace(R.id.container, frag, frag.getTag()).addToBackStack("");
+            ft.replace(R.id.container, frag, frag.getTag()).addToBackStack(null);
 
             ft.commit();
 
@@ -176,7 +294,6 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     }
 
     @Override
-
     public void onBackPressed() {
         drawer.closeDrawer(GravityCompat.START);
         MenuItem homeItem = mBottomNav.getMenu().getItem(0);
@@ -188,10 +305,21 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
             selectFragment(homeItem);
 
         } else {
-finish();
+
+            finish();
             //super.onBackPressed();
 
         }
+
+    }
+
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+
+        MenuItem homeItem = mBottomNav.getMenu().getItem(0);
+
+        selectFragment(homeItem);
 
     }
 
@@ -220,24 +348,40 @@ finish();
                 selectFragment(navselectedItem);
                 break;
 
-            case R.id.nav_notification :
+            case R.id.nav_projects :
                 navselectedItem = mBottomNav.getMenu().getItem(1);
                 selectFragment(navselectedItem);
                 break;
 
-            case R.id.nav_profile :
-                navselectedItem = mBottomNav.getMenu().getItem(2);
-                selectFragment(navselectedItem);
-                break;
-            case R.id.msginbox:
+            case R.id.nav_profile:
                 if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                    Intent chatIntent = new Intent(getApplicationContext(), ChatsListActivity.class);
+                    Intent chatIntent = new Intent(getApplicationContext(), ProfileActivity.class);
                     startActivity(chatIntent);
                 }else {
                     Intent intent=new Intent(getApplicationContext(),LoginActivity.class);
                     startActivity(intent);
-
                 }
+                break;
+
+            case R.id.nav_chat :
+                navselectedItem = mBottomNav.getMenu().getItem(2);
+                selectFragment(navselectedItem);
+                break;
+
+            case R.id.nav_rewards:
+                if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                    Intent intent = new Intent(getApplicationContext(), RewardsActivity.class);
+                    startActivity(intent);
+                    //finish();
+                }else {
+                    Intent intent=new Intent(getApplicationContext(),LoginActivity.class);
+                    startActivity(intent);
+                }
+                break;
+
+            case R.id.nav_google_news :
+                navselectedItem = mBottomNav.getMenu().getItem(3);
+                selectFragment(navselectedItem);
                 break;
 
             case R.id.nav_logout :
@@ -253,4 +397,5 @@ finish();
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 }

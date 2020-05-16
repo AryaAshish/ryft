@@ -180,6 +180,7 @@ class ProfilePresenter extends BasePresenter<ProfileView> {
                     } else {
                         view.setDefaultProfilePhoto();
                     }
+                    view.setCredits(profile.getCredits());
                     int likesCount = (int) profile.getLikesCount();
                     String likesLabel = context.getResources().getQuantityString(R.plurals.likes_counter_format, likesCount, likesCount);
                     view.updateLikesCounter(buildCounterSpannable(likesLabel, likesCount));

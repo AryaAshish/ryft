@@ -21,6 +21,11 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.architectica.socialcomponents.main.base.BasePresenter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * Created by Alexey on 03.05.18.

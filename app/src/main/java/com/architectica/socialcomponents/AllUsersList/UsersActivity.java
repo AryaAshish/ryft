@@ -31,6 +31,9 @@ public class UsersActivity extends AppCompatActivity {
 
     ProgressDialog pd;
 
+    private List<String> names = new ArrayList<>();
+    private List<String> ids = new ArrayList<>();
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -87,7 +90,7 @@ public class UsersActivity extends AppCompatActivity {
     private void initChatsList(List<Profile> profiles){
 
         recyclerView = findViewById(R.id.users_list);
-        adapter = new ChatsListAdapter(this,profiles);
+        adapter = new ChatsListAdapter(this,profiles,names,ids);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
         recyclerView.setAdapter(adapter);

@@ -17,19 +17,29 @@
 package com.architectica.socialcomponents.main.post;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.architectica.socialcomponents.adapters.HashtagAdapter;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.main.pickImageBase.PickImageActivity;
+import com.architectica.socialcomponents.model.hashtag;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.hendraanggrian.appcompat.widget.SocialAutoCompleteTextView;
 
-import org.w3c.dom.Text;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Alexey on 03.05.18.
@@ -40,7 +50,7 @@ public abstract class BaseCreatePostActivity<V extends BaseCreatePostView, P ext
     protected ImageView imageView;
     protected ProgressBar progressBar;
     protected EditText titleEditText;
-    protected EditText descriptionEditText;
+    protected SocialAutoCompleteTextView descriptionEditText;
     protected TextView uploadTxt;
     protected RelativeLayout imageContainer;
 
@@ -57,6 +67,15 @@ public abstract class BaseCreatePostActivity<V extends BaseCreatePostView, P ext
 
         titleEditText = findViewById(R.id.titleEditText);
         descriptionEditText = findViewById(R.id.descriptionEditText);
+
+        descriptionEditText.setHashtagEnabled(true);
+        descriptionEditText.setMentionEnabled(false);
+        descriptionEditText.setHyperlinkEnabled(false);
+
+        descriptionEditText.setHashtagColor(Color.BLUE);
+
+        setHashtagAdapter();
+
         progressBar = findViewById(R.id.progressBar);
 
         imageView = findViewById(R.id.imageView);
@@ -73,6 +92,36 @@ public abstract class BaseCreatePostActivity<V extends BaseCreatePostView, P ext
 
             return false;
         });
+    }
+
+    public void setHashtagAdapter(){
+
+        FirebaseDatabase.getInstance().getReference("hashtags").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                ArrayAdapter<hashtag> hashtagAdapter = new HashtagAdapter(getApplicationContext());
+
+                if (dataSnapshot.exists()){
+
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+
+                        hashtagAdapter.add(new hashtag(snapshot.getKey()));
+
+                    }
+
+                }
+
+                descriptionEditText.setHashtagAdapter(hashtagAdapter);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 
     @Override
@@ -115,6 +164,11 @@ public abstract class BaseCreatePostActivity<V extends BaseCreatePostView, P ext
     }
 
     @Override
+    public List<String> getHashtagsList() {
+        return descriptionEditText.getHashtags();
+    }
+
+    @Override
     public void requestImageViewFocus() {
         imageView.requestFocus();
     }
@@ -129,4 +183,5 @@ public abstract class BaseCreatePostActivity<V extends BaseCreatePostView, P ext
     public Uri getImageUri() {
         return imageUri;
     }
+
 }

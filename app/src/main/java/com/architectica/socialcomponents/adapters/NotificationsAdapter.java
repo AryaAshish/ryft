@@ -12,6 +12,7 @@ import com.architectica.socialcomponents.adapters.holders.PostViewHolder;
 import com.architectica.socialcomponents.controllers.LikeController;
 import com.architectica.socialcomponents.enums.ItemType;
 import com.architectica.socialcomponents.main.main.MainActivity;
+import com.architectica.socialcomponents.main.main.Notifications.NotificationsActivity;
 import com.architectica.socialcomponents.managers.PostManager;
 import com.architectica.socialcomponents.managers.listeners.OnPostListChangedListener;
 import com.architectica.socialcomponents.model.Post;
@@ -32,9 +33,9 @@ public class NotificationsAdapter extends BasePostsAdapter {
     private boolean isMoreDataAvailable = true;
     private long lastLoadedItemCreatedDate;
     private SwipeRefreshLayout swipeContainer;
-    private MainActivity mainActivity;
+    private NotificationsActivity mainActivity;
 
-    public NotificationsAdapter(final MainActivity activity, SwipeRefreshLayout swipeContainer) {
+    public NotificationsAdapter(final NotificationsActivity activity, SwipeRefreshLayout swipeContainer) {
         super(activity);
         this.mainActivity = activity;
         this.swipeContainer = swipeContainer;
@@ -187,7 +188,6 @@ public class NotificationsAdapter extends BasePostsAdapter {
 
         PostManager.getInstance(activity).getAdminPostsList(onPostsDataChangedListener, nextItemCreatedDate);
     }
-
 
     private void hideProgress() {
         if (!postList.isEmpty() && getItemViewType(postList.size() - 1) == ItemType.LOAD.getTypeCode()) {

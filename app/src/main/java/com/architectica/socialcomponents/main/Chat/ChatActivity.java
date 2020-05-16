@@ -72,7 +72,8 @@ public class ChatActivity extends AppCompatActivity {
     private static final int TOTAL_ITEMS_TO_LOAD = 10;
     private int mCurrentPage = 1;
 
-    private static final int GALLERY_PICK = 1;
+    private static final int GALLERY_PICK_NORMAL_CHAT = 1;
+    private static final int GALLERY_PICK_GROUP_CHAT = 2;
 
     // Storage Firebase
     private StorageReference mImageStorage;
@@ -84,6 +85,8 @@ public class ChatActivity extends AppCompatActivity {
     private String mPrevKey = "";
 
     String userName;
+
+    String chatType;
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -141,6 +144,7 @@ public class ChatActivity extends AppCompatActivity {
 
         mChatUser = getIntent().getStringExtra("ChatUser");
         userName = getIntent().getStringExtra("UserName");
+        chatType = getIntent().getStringExtra("ChatType");
 
         loadMessages();
 
@@ -155,8 +159,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-
-
         mChatAddBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -165,7 +167,16 @@ public class ChatActivity extends AppCompatActivity {
                 galleryIntent.setType("application/pdf");
                 galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
 
-                startActivityForResult(Intent.createChooser(galleryIntent, "SELECT FILE"), GALLERY_PICK);
+                if("NormalChat".equals(chatType)){
+
+                    startActivityForResult(Intent.createChooser(galleryIntent, "SELECT FILE"), GALLERY_PICK_NORMAL_CHAT);
+
+                }
+                else{
+
+                    startActivityForResult(Intent.createChooser(galleryIntent, "SELECT FILE"), GALLERY_PICK_GROUP_CHAT);
+
+                }
 
             }
         });
@@ -182,7 +193,6 @@ public class ChatActivity extends AppCompatActivity {
 
                 loadMoreMessages();
 
-
             }
         });
 
@@ -194,7 +204,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(requestCode == GALLERY_PICK && resultCode == RESULT_OK){
+        if(resultCode == RESULT_OK && (requestCode == GALLERY_PICK_NORMAL_CHAT || requestCode == GALLERY_PICK_GROUP_CHAT)){
 
             Uri imageUri = data.getData();
 
@@ -231,8 +241,18 @@ public class ChatActivity extends AppCompatActivity {
                                 messageMap.put("from", mCurrentUserId);
 
                                 Map messageUserMap = new HashMap();
-                                messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
-                                messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+                                if (requestCode == GALLERY_PICK_NORMAL_CHAT){
+
+                                    messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
+                                    messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+                                }
+                                else {
+
+                                    messageUserMap.put("groupchats/" + mChatUser + "/messages/" + push_id,messageMap);
+
+                                }
 
                                 pd.dismiss();
 
@@ -265,7 +285,18 @@ public class ChatActivity extends AppCompatActivity {
 
     private void loadMoreMessages() {
 
-        DatabaseReference messageRef = mRootRef.child("messages").child(mCurrentUserId).child(mChatUser);
+        DatabaseReference messageRef;
+
+        if("NormalChat".equals(chatType)){
+
+            messageRef = mRootRef.child("messages").child(mCurrentUserId).child(mChatUser);
+
+        }
+        else{
+
+            messageRef = mRootRef.child("groupchats").child(mChatUser).child("messages");
+
+        }
 
         Query messageQuery = messageRef.orderByKey().endAt(mLastKey).limitToLast(10);
 
@@ -330,7 +361,18 @@ public class ChatActivity extends AppCompatActivity {
 
     private void loadMessages() {
 
-        DatabaseReference messageRef = mRootRef.child("messages").child(mCurrentUserId).child(mChatUser);
+        DatabaseReference messageRef;
+
+        if("NormalChat".equals(chatType)){
+
+            messageRef = mRootRef.child("messages").child(mCurrentUserId).child(mChatUser);
+
+        }
+        else{
+
+            messageRef = mRootRef.child("groupchats").child(mChatUser).child("messages");
+
+        }
 
         Query messageQuery = messageRef.limitToLast(mCurrentPage * TOTAL_ITEMS_TO_LOAD);
 
@@ -405,8 +447,18 @@ public class ChatActivity extends AppCompatActivity {
             messageMap.put("timestamp", ServerValue.TIMESTAMP);
 
             Map messageUserMap = new HashMap();
-            messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
-            messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+            if ("NormalChat".equals(chatType)){
+
+                messageUserMap.put(current_user_ref + "/" + push_id, messageMap);
+                messageUserMap.put(chat_user_ref + "/" + push_id, messageMap);
+
+            }
+            else {
+
+                messageUserMap.put("groupchats/" + mChatUser + "/messages/" + push_id,messageMap);
+
+            }
 
             mChatMessageView.setText("");
 
@@ -426,4 +478,5 @@ public class ChatActivity extends AppCompatActivity {
         }
 
     }
+
 }

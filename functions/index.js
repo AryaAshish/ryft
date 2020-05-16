@@ -1,352 +1,554 @@
+'use strict';
+
 const functions = require('firebase-functions');
 
 const admin = require('firebase-admin');
-admin.initializeApp(functions.config().firebase);
 
-const actionTypeNewLike = "new_like";
-const actionTypeNewComment = "new_comment";
+admin.initializeApp();
+
+const actionTypeNewPostLike = "new_post_like";
+const actionTypeNewProjectLike = "new_project_like";
+const actionTypeNewPostComment = "new_post_comment";
+const actionTypeNewProjectComment = "new_project_comment";
+const actionTypeNewMessage = "new_message";
+const actionTypeNewGroupMessage = "new_group_message";
 const actionTypeNewPost = "new_post";
-const notificationTitle = "Social App";
+const actionTypeNewResponse = "new_response";
+const actionTypeNewSelection = "new_selection";
+const notificationTitle = "Rift";
 
-const followingPosDbValue = "following_post";
-const followingPosDbKey = "followingPostsIds";
-const followingsDbKey = "followings";
-const followersDbKey = "followers";
-const followingDbKey = "follow";
-
-const postsTopic = "postsTopic";
-
-const THUMB_MEDIUM_SIZE = 1024; //px
-const THUMB_SMALL_SIZE = 100; //px
-
-const THUMB_MEDIUM_DIR = "medium";
-const THUMB_SMALL_DIR = "small";
-
-const gcs = require('@google-cloud/storage')();
 const path = require('path');
 const sharp = require('sharp');
 const os = require('os');
 const fs = require('fs');
 
-exports.pushNotificationLikes = functions.database.ref('/post-likes/{postId}/{authorId}/{likeId}').onCreate((snap, context)  => {
+exports.pushNotificationPostLikes = functions.database.ref('/post-likes/{postId}/{authorId}/{likeId}').onCreate((snap, context)  => {
 
-    console.log('New like was added');
+    console.log('New post like was added');
 
     const likeAuthorId = context.params.authorId;
     const postId = context.params.postId;
+    const likeId = context.params.likeId;
 
-    // Get liked post.
-    const getPostTask = admin.database().ref(`/posts/${postId}`).once('value');
+    return sendPostLikeNotification(postId,likeAuthorId,likeId);
 
-    return getPostTask.then(post => {
-
-        if (likeAuthorId === post.val().authorId) {
-            console.log('User liked own post');
-            return 'User liked own post';
-        }
-
-        // Get the list of device notification tokens.
-        const getDeviceTokensTask = admin.database().ref(`/profiles/${post.val().authorId}/notificationTokens`).once('value');
-        console.log('getDeviceTokensTask path: ', `/profiles/${post.val().authorId}/notificationTokens`);
-
-        // Get like author.
-        const getLikeAuthorProfileTask = admin.database().ref(`/profiles/${likeAuthorId}`).once('value');
-
-        return Promise.all([getDeviceTokensTask, getLikeAuthorProfileTask]).then(results => {
-            const tokensSnapshot = results[0];
-            const likeAuthorProfile = results[1].val();
-
-            // Check if there are any device tokens.
-            if (!tokensSnapshot.hasChildren()) {
-                return console.log('There are no notification tokens to send to.');
-            }
-
-            console.log('There are', tokensSnapshot.numChildren(), 'tokens to send notifications to.');
-            console.log('Fetched like Author profile', likeAuthorProfile);
-
-            // Create a notification
-            const payload = {
-                data: {
-                    actionType: actionTypeNewLike,
-                    title: notificationTitle,
-                    body: `${likeAuthorProfile.username} liked your post`,
-                    icon: post.val().imagePath,
-                    postId: postId,
-
-                },
-            };
-
-            // Listing all tokens.
-            const tokens = Object.keys(tokensSnapshot.val());
-            console.log('tokens:', tokens[0]);
-
-            // Send notifications to all tokens.
-            return admin.messaging().sendToDevice(tokens, payload).then(response => {
-                // For each message check if there was an error.
-                const tokensToRemove = [];
-                response.results.forEach((result, index) => {
-                    const error = result.error;
-                    if (error) {
-                        console.error('Failure sending notification to', tokens[index], error);
-                        // Cleanup the tokens who are not registered anymore.
-                        if (error.code === 'messaging/invalid-registration-token' ||
-                            error.code === 'messaging/registration-token-not-registered') {
-                            tokensToRemove.push(tokensSnapshot.ref.child(tokens[index]).remove());
-                        }
-                    }
-                });
-                return Promise.all(tokensToRemove);
-            });
-        }).catch((fallback) => {
-            console.error('Failure getPostTask', fallback);
-        });
-    }).catch((fallback) => {
-        console.error('Failure getPostTask', fallback);
-    })
 });
 
-exports.pushNotificationComments = functions.database.ref('/post-comments/{postId}/{commentId}').onCreate((snap, context) => {
+exports.pushNotificationProjectLikes = functions.database.ref('/project-likes/{postId}/{authorId}/{likeId}').onCreate((snap, context)  => {
 
+    console.log('New project like was added');
+
+    const likeAuthorId = context.params.authorId;
+    const postId = context.params.postId;
+    const likeId = context.params.likeId;
+
+    return sendProjectLikeNotification(postId,likeAuthorId,likeId);
+
+});
+
+exports.pushNotificationPostComments = functions.database.ref('/post-comments/{postId}/{commentId}').onCreate((snap, context) => {
+
+    console.log('New post comment was added');
+
+    const commentAuthorId = snap.val().authorId;
+    const postId = context.params.postId;
     const commentId = context.params.commentId;
-    const postId = context.params.postId;
-    const comment = snap.val();
 
-    console.log('New comment was added, id: ', postId);
+    return sendPostCommentNotification(postId,commentAuthorId,commentId);
 
-    // Get the commented post .
-    const getPostTask = admin.database().ref(`/posts/${postId}`).once('value');
-
-    return getPostTask.then(post => {
-
-        // Get the list of device notification tokens.
-        const getDeviceTokensTask = admin.database().ref(`/profiles/${post.val().authorId}/notificationTokens`).once('value');
-        console.log('getDeviceTokensTask path: ', `/profiles/${post.val().authorId}/notificationTokens`);
-
-        // Get post author.
-        const getCommentAuthorProfileTask = admin.database().ref(`/profiles/${comment.authorId}`).once('value');
-        console.log('getCommentAuthorProfileTask path: ', `/profiles/${comment.authorId}`);
-
-        return Promise.all([getDeviceTokensTask, getCommentAuthorProfileTask]).then(results => {
-            const tokensSnapshot = results[0];
-            const commentAuthorProfile = results[1].val();
-
-            if (commentAuthorProfile.id === post.val().authorId) {
-                console.log('User commented own post');
-                return 'User commented own post';
-            }
-
-            // Check if there are any device tokens.
-            if (!tokensSnapshot.hasChildren()) {
-                console.log('There are no notification tokens to send to.');
-                return 'There are no notification tokens to send to.';
-            }
-
-            console.log('There are', tokensSnapshot.numChildren(), 'tokens to send notifications to.');
-
-            // Create a notification
-            const payload = {
-                data: {
-                    actionType: actionTypeNewComment,
-                    title: notificationTitle,
-                    body: `${commentAuthorProfile.username} commented your post`,
-                    icon: post.val().imagePath,
-                    postId: postId,
-                },
-            };
-
-            // Listing all tokens.
-            const tokens = Object.keys(tokensSnapshot.val());
-            console.log('tokens:', tokens[0]);
-
-            // Send notifications to all tokens.
-            return admin.messaging().sendToDevice(tokens, payload).then(response => {
-                // For each message check if there was an error.
-                const tokensToRemove = [];
-                response.results.forEach((result, index) => {
-                    const error = result.error;
-                    if (error) {
-                        console.error('Failure sending notification to', tokens[index], error);
-                        // Cleanup the tokens who are not registered anymore.
-                        if (error.code === 'messaging/invalid-registration-token' ||
-                            error.code === 'messaging/registration-token-not-registered') {
-                            tokensToRemove.push(tokensSnapshot.ref.child(tokens[index]).remove());
-                        }
-                    }
-                });
-                return Promise.all(tokensToRemove);
-            });
-        }).catch((fallback) => {
-            console.error('Failure getPostTask', fallback);
-        });
-    }).catch((fallback) => {
-        console.error('Failure getPostTask', fallback);
-    })
 });
 
-exports.pushNotificationNewPost = functions.database.ref('/posts/{postId}').onCreate((snap, context) => {
+exports.pushNotificationProjectComments = functions.database.ref('/project-comments/{postId}/{commentId}').onCreate((snap, context) => {
+
+    console.log('New project comment was added');
+
+    const commentAuthorId = snap.val().authorId;
     const postId = context.params.postId;
+    const commentId = context.params.commentId;
 
-    console.log('New post was created');
+    return sendProjectCommentNotification(postId,commentAuthorId,commentId);
 
-    // Get post authorID.
-    const getAuthorIdTask = admin.database().ref(`/posts/${postId}/authorId`).once('value');
+});
 
-    return getAuthorIdTask.then(authorId => {
+exports.pushNotificationMessages = functions.database.ref('/messages/{toId}/{fromId}/{messageId}').onCreate((snap, context) => {
 
-        console.log('post author id', authorId.val());
+    const fromId = context.params.fromId;
+    const toId = context.params.toId;
+    const messageId = context.params.messageId;
+    const from = snap.val().from;
+
+    if(fromId === from){
+
+        console.log("send a message notification");
+
+        return sendMessageNotification(toId,fromId,messageId);
+
+    }
+
+    return null;
+
+});
+
+exports.pushNotificationGroupMessages = functions.database.ref('/groupchats/{projectId}/messages/{messageId}').onCreate((snap, context) => {
+
+    const projectId = context.params.projectId;
+    const messageId = context.params.messageId;
+    const fromId = snap.val().from;
+
+    return sendGroupMessageNotification(projectId,fromId,messageId);
+
+});
+
+exports.pushNotificationNewProjectApplication = functions.database.ref('/projects/{projectId}/responses/{responseId}').onCreate((snap, context) => {
+
+    const projectId = context.params.projectId;
+    const responseId = context.params.responseId;
+
+    return sendNewProjectApplicationNotification(projectId,responseId);
+
+});
+
+exports.pushNotificationCandidateSelection = functions.database.ref('/projects/{projectId}/selectedCandidates/{candidateId}').onCreate((snap, context) => {
+
+    const projectId = context.params.projectId;
+    const candidateId = context.params.candidateId;
+
+    return sendCandidateSelectionNotification(projectId,candidateId);
+
+});
+
+async function sendCandidateSelectionNotification(projectId,candidateId){
+    
+    const tokens = await getDeviceTokens(candidateId);
+
+    if (tokens.length > 0) {
+
+        // Notification details.
 
         // Create a notification
-        const payload = {
+        let payload = {
             data: {
-                actionType: actionTypeNewPost,
-                postId: postId,
-                authorId: authorId.val(),
+                actionType: actionTypeNewSelection,
+                title: notificationTitle,
+                body: `You are selected for a project`,
+                postId: projectId
             },
         };
 
-        // Send a message to devices subscribed to the provided topic.
-        return admin.messaging().sendToTopic(postsTopic, payload).then(response => {
-            // See the MessagingTopicResponse reference documentation for the
-            // contents of response.
-            console.log("Successfully sent info about new post :", response);
-            return response;
-        })
-            .catch(error => {
-                console.log("Error sending info about new post:", error);
-            });
-    }).catch(fallback => {
-        console.error('Failure getPostTask', fallback);
-    });
-
-});
-
-
-exports.addNewPostToFollowers = functions.database.ref('/posts/{postId}').onCreate((snap, context) => {
-    const postId = context.params.postId;
-
-    console.log('New post was created');
-
-    // Get post authorID.
-    const getAuthorIdTask = admin.database().ref(`/posts/${postId}/authorId`).once('value');
-
-    return getAuthorIdTask.then(authorId => {
-
-        console.log('post author id', authorId.val());
-
-        // Get followers ids.
-        return admin.database().ref().child(followingDbKey).child(authorId.val()).child(followersDbKey).once('value', function(snapshot) {
-            snapshot.forEach(function (childSnapshot) {
-                let followerId = childSnapshot.val().profileId;
-                console.log('setNewPostValuesToFollower', "followerId:", followerId, "postId:", postId);
-
-                admin.database().ref().child(followingPosDbKey).child(followerId).child(postId).set({
-                    postId:postId
-                });
-            });
-        }).catch(fallback => {
-            console.error('Failure get followers ids', fallback);
-        });
-
-    }).catch(fallback => {
-        console.error('Failure getPostTask', fallback);
-    });
-
-});
-
-
-exports.removePostFromFollowingList = functions.database.ref('/posts/{postId}').onDelete((snap, context) => {
-    const postId = context.params.postId;
-    const authorId = snap.val().authorId;
-
-    // Get followers ids.
-    return admin.database().ref().child(followingDbKey).child(authorId).child(followersDbKey).once('value', function(snapshot) {
-        snapshot.forEach(function (childSnapshot) {
-            let followerId = childSnapshot.val().profileId;
-            admin.database().ref().child(followingPosDbKey).child(followerId).child(postId).remove();
-            console.log('remove post if from following list for followerId:', followerId, "postId:", postId);
-        });
-    }).catch(fallback => {
-        console.error('Failure get followers ids', fallback);
-    });
-});
-
-exports.generateThumbnail = functions.storage.object().onFinalize((object) => {
-    const fileBucket = object.bucket; // The Storage bucket that contains the origin file.
-    const filePath = object.name; // File path in the bucket.
-    const contentType = object.contentType; // File content type.
-
-    const generateThumbsPromises = generateThumbnailsGeneral(fileBucket, filePath, contentType);
-
-    if(generateThumbsPromises !== null) {
-        return generateThumbsPromises.then(() => {
-            console.log('Thumbnail created successfully');
-            return null;
-        })
-    } else {
-        return null;
+        console.log("send notification to : ",tokens[0]);
+    
+        // Send notifications to all tokens.
+    
+        return admin.messaging().sendToDevice(tokens, payload);
+    
     }
 
-});
-
-function generateThumbnailsGeneral(fileBucket, filePath, contentType) {
-    console.log("fileBucket", fileBucket);
-    console.log("filePath", filePath);
-    console.log("contentType", contentType);
-
-    // Exit if this is triggered on a file that is not an image.
-    if (!contentType.startsWith('image/')) {
-        console.log('This is not an image.');
-        return null;
-    }
-
-    // Get the dir name.
-    const dirname = path.dirname(filePath);
-    if (dirname.includes(THUMB_MEDIUM_DIR) || dirname.includes(THUMB_SMALL_DIR)) {
-        console.log('Already scaled.');
-        return null;
-    }
-
-    // Download file from bucket.
-
-    const fileName = path.basename(filePath);
-
-    const tempFilePath = path.join(os.tmpdir(), fileName);
-    const bucket = gcs.bucket(fileBucket);
-
-    return bucket.file(filePath)
-        .download({
-            destination: tempFilePath
-        })
-        .then(() => {
-            console.log('download origin file successfully');
-            const mediumThumbPromise = createThumb(fileName, filePath, tempFilePath, THUMB_MEDIUM_DIR, THUMB_MEDIUM_SIZE, bucket);
-            const smallThumbPromise = createThumb(fileName, filePath, tempFilePath, THUMB_SMALL_DIR, THUMB_SMALL_SIZE, bucket);
-            return Promise.all([mediumThumbPromise, smallThumbPromise])
-        })
-        .then(() => {
-            fs.unlinkSync(tempFilePath);
-            console.log(`removing origimal temp file complete`);
-            return null;
-        });
+    return null;
+    
 }
 
-function createThumb(fileName, originFilePath, tempFilePath, thumbDir, size, bucket) {
-    const newFileTemp = path.join(os.tmpdir(), `${fileName}_${size}_tmp.jpg`);
-    const newFilePath = path.join(path.dirname(originFilePath), thumbDir, fileName);
+async function sendNewProjectApplicationNotification(projectId,responseId){
 
-    return sharp(tempFilePath)
-        .resize(size, size)
-        .max()
-        .toFile(newFileTemp)
-        .then(info => {
-            console.log(`resize ${size} complete, filePath = ${newFilePath}`);
-            return bucket.upload(newFileTemp, {
-                destination: newFilePath
-            })
-        })
-        .then(() => {
-            fs.unlinkSync(newFileTemp);
-            console.log(`removing thumb temp file for size ${size} px is complete`);
-            return null;
-        });
+    const projectAuthor = await getProjectAuthorId(projectId);
+
+    const appliedUserName = await getUsername(responseId);
+
+    const tokens = await getDeviceTokens(projectAuthor);
+
+    if (tokens.length > 0) {
+
+        // Notification details.
+
+        // Create a notification
+        let payload = {
+            data: {
+                actionType: actionTypeNewResponse,
+                title: notificationTitle,
+                body: `${appliedUserName} applied to your project`,
+                postId: projectId,
+                responseId: responseId
+            },
+        };
+
+        console.log("send notification to : ",tokens[0]);
+    
+        // Send notifications to all tokens.
+    
+        return admin.messaging().sendToDevice(tokens, payload);
+    
+    }
+
+    return null;
+
+}
+
+async function getDeviceTokensForGroup(projectId){
+
+    const snap = await admin.database().ref(`/groupchats/${projectId}/users`).once('value');
+
+    if (snap.exists()) {
+
+        const snap1 = await admin.database().ref(`/profiles`).once('value');
+
+        let tokens = [];
+
+        let users = snap.val();
+
+        for(var i=0;i<users.length;i++){
+
+            let user = users[i];
+
+            let uid = user.userid;
+
+            console.log(uid);
+
+            if(snap1.exists()){
+
+                let usertokens = Object.keys(snap1.val().uid.notificationTokens);
+
+                for(var j=0;j<usertokens.length;j++){
+
+                    tokens.push(usertokens[j]);
+
+                }
+
+            }
+
+        }
+
+        /*users.forEach(user => {
+
+            let uid = user.userid;
+
+            console.log(uid);
+
+            if(snap1.exists()){
+
+                Object.keys(snap1.val().uid.notificationTokens).forEach(token => {
+
+                    tokens.push(token);
+    
+                });
+
+            }
+
+        });*/
+
+        return tokens;
+    
+    }
+    
+    return [];
+
+}
+
+async function sendGroupMessageNotification(projectId,fromId,messageId){
+
+    const fromUsername = await getUsername(fromId);
+
+    const tokens = await getDeviceTokensForGroup(projectId);
+
+    if (tokens.length > 0) {
+
+        // Notification details.
+
+        // Create a notification
+        let payload = {
+            data: {
+                actionType: actionTypeNewGroupMessage,
+                title: notificationTitle,
+                body: `${fromUsername} messaged in your project group`,
+                //icon: postImagePath,
+                fromId: fromId
+            },
+        };
+
+        console.log("send notification to : ",tokens[0]);
+    
+        // Send notifications to all tokens.
+    
+        return admin.messaging().sendToDevice(tokens, payload);
+    
+    }
+
+    return null;
+
+
+}
+
+async function sendMessageNotification(toId,fromId,messageId){
+
+    const fromUsername = await getUsername(fromId);
+
+    const tokens = await getDeviceTokens(toId);
+
+    if (tokens.length > 0) {
+
+        // Notification details.
+
+        // Create a notification
+        let payload = {
+            data: {
+                actionType: actionTypeNewMessage,
+                title: notificationTitle,
+                body: `${fromUsername} messaged you`,
+                fromId: fromId,
+                toId: toId
+            },
+        };
+
+        console.log("send notification to : ",tokens[0]);
+    
+        // Send notifications to all tokens.
+    
+        return admin.messaging().sendToDevice(tokens, payload);
+    
+    }
+
+    return null;
+
+}
+
+async function getPostAuthorId(postId){
+
+    const snap = await admin.database().ref(`/posts/${postId}`).once('value');
+
+    if (snap.exists()) {
+
+        return snap.val().authorId;
+    
+    }
+    
+    return null;
+
+}
+
+async function getUsername(uid){
+
+    const snap = await admin.database().ref(`/profiles/${uid}`).once('value');
+
+    if (snap.exists()) {
+
+        return snap.val().username;
+    
+    }
+    
+    return null;
+
+}
+
+async function getDeviceTokens(uid){
+
+    const snap = await admin.database().ref(`/profiles/${uid}/notificationTokens`).once('value');
+
+    if (snap.exists()) {
+
+        return Object.keys(snap.val());
+    
+    }
+    
+    return [];
+
+}
+
+async function getProjectImagePath(postId){
+
+    const snap = await admin.database().ref(`/projects/${postId}`).once('value');
+
+    if (snap.exists()) {
+
+        return snap.val().imageTitle;
+    
+    }
+    
+    return null;
+
+}
+
+async function getPostImagePath(postId){
+
+    const snap = await admin.database().ref(`/posts/${postId}`).once('value');
+
+    if (snap.exists()) {
+
+        return snap.val().imageTitle;
+    
+    }
+    
+    return null;
+
+}
+
+async function sendPostCommentNotification(postId,likeAuthorId,likeId){
+
+    const postAuthorId = await getPostAuthorId(postId);
+
+    if (likeAuthorId === postAuthorId){
+        console.log('User commented own post');
+        return 'User commented own post';
+    }
+
+    const postImagePath = await getPostImagePath(postId);
+
+    const likeAuthorUsername = await getUsername(likeAuthorId);
+
+    const tokens = await getDeviceTokens(postAuthorId);
+
+    if (tokens.length > 0) {
+
+        // Notification details.
+
+        // Create a notification
+        let payload = {
+            data: {
+                actionType: actionTypeNewPostComment,
+                title: notificationTitle,
+                body: `${likeAuthorUsername} commented on your post`,
+                icon: postImagePath,
+                postId: postId
+            },
+        };
+    
+        // Send notifications to all tokens.
+    
+        return admin.messaging().sendToDevice(tokens, payload);
+    
+    }
+
+    return null;
+
+}
+
+async function sendPostLikeNotification(postId,likeAuthorId,likeId){
+
+    const postAuthorId = await getPostAuthorId(postId);
+
+    if (likeAuthorId === postAuthorId){
+        console.log('User liked own post');
+        return 'User liked own post';
+    }
+
+    const postImagePath = await getPostImagePath(postId);
+
+    const likeAuthorUsername = await getUsername(likeAuthorId);
+
+    const tokens = await getDeviceTokens(postAuthorId);
+
+    if (tokens.length > 0) {
+
+        // Notification details.
+
+        // Create a notification
+        let payload = {
+            data: {
+                actionType: actionTypeNewPostLike,
+                title: notificationTitle,
+                body: `${likeAuthorUsername} liked your post`,
+                icon: postImagePath,
+                postId: postId
+            },
+        };
+    
+        // Send notifications to all tokens.
+    
+        return admin.messaging().sendToDevice(tokens, payload);
+    
+    }
+
+    return null;
+
+}
+
+async function getProjectAuthorId(postId){
+
+    const snap = await admin.database().ref(`/projects/${postId}`).once('value');
+
+    if (snap.exists()) {
+
+        return snap.val().authorId;
+    
+    }
+    
+    return null;
+
+}
+
+async function sendProjectCommentNotification(postId,likeAuthorId,likeId){
+
+    const postAuthorId = await getProjectAuthorId(postId);
+
+    if (likeAuthorId === postAuthorId){
+        console.log('User commented own project');
+        return 'User commented own project';
+    }
+
+    const postImagePath = await getProjectImagePath(postId);
+
+    const likeAuthorUsername = await getUsername(likeAuthorId);
+
+    const tokens = await getDeviceTokens(postAuthorId);
+
+    if (tokens.length > 0) {
+
+        // Notification details.
+
+        // Create a notification
+        let payload = {
+            data: {
+                actionType: actionTypeNewProjectComment,
+                title: notificationTitle,
+                body: `${likeAuthorUsername} commented on your project`,
+                icon: postImagePath,
+                postId: postId
+            },
+        };
+    
+        // Send notifications to all tokens.
+    
+        return admin.messaging().sendToDevice(tokens, payload);
+    
+    }
+
+    return null;
+
+}
+
+async function sendProjectLikeNotification(postId,likeAuthorId,likeId){
+
+    const postAuthorId = await getProjectAuthorId(postId);
+
+    if (likeAuthorId === postAuthorId){
+        console.log('User liked own post');
+        return 'User liked own post';
+    }
+
+    const postImagePath = await getProjectImagePath(postId);
+
+    const likeAuthorUsername = await getUsername(likeAuthorId);
+
+    const tokens = await getDeviceTokens(postAuthorId);
+
+    if (tokens.length > 0) {
+
+        // Notification details.
+
+        // Create a notification
+        let payload = {
+            data: {
+                actionType: actionTypeNewProjectLike,
+                title: notificationTitle,
+                body: `${likeAuthorUsername} liked your project`,
+                icon: postImagePath,
+                postId: postId
+            },
+        };
+    
+        // Send notifications to all tokens.
+    
+        return admin.messaging().sendToDevice(tokens, payload);
+    
+    }
+
+    return null;
+
 }

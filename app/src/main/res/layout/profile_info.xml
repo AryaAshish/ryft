@@ -59,9 +59,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:padding="8dp"
+            android:padding="0dp"
+            android:paddingTop="@dimen/intrinsic_padding"
             android:textAppearance="@style/TextAppearance.Counter"
             tools:text="Skill" />
+
+        <TextView
+            android:id="@+id/credits"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="8dp"
+            android:textAppearance="@style/TextAppearance.Counter"
+            tools:text="Reward Points" />
 
         <RelativeLayout
             android:layout_width="match_parent"

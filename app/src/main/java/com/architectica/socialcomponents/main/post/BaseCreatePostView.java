@@ -20,6 +20,8 @@ import android.net.Uri;
 
 import com.architectica.socialcomponents.main.pickImageBase.PickImageView;
 
+import java.util.List;
+
 /**
  * Created by Alexey on 03.05.18.
  */
@@ -32,6 +34,8 @@ public interface BaseCreatePostView extends PickImageView {
     String getTitleText();
 
     String getDescriptionText();
+
+    List<String> getHashtagsList();
 
     void requestImageViewFocus();
 

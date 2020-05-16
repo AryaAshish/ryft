@@ -6,14 +6,20 @@
         />
 
     <item
-        android:id="@+id/menu_notifications"
-        android:title="@string/menu_notifications"
-        android:icon="@drawable/ic_notifications_black_24dp" />
+        android:id="@+id/menu_projects"
+        android:title="@string/menu_projects"
+        android:icon="@drawable/ic_event_note_black_24dp"
+        />
 
     <item
-        android:id="@+id/menu_profile"
-        android:title="@string/menu_profile"
-        android:icon="@drawable/ic_person"
+        android:id="@+id/menu_chats"
+        android:title="Chats"
+        android:icon="@drawable/ic_chat_black_24dp" />
+
+    <item
+        android:id="@+id/menu_google_news"
+        android:title="Google News"
+        android:icon="@drawable/ic_news"
         />
 
 </menu>

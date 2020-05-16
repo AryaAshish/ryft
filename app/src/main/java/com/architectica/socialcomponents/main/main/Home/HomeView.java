@@ -16,7 +16,7 @@ public interface HomeView extends BaseFragmentView {
     void removePost();
     void updatePost();
     void showCounterView(int count);
-    void openChatActivity();
-    void openChatsList();
+    void openNotificationsActivity();
+    void openUserProfileActivity();
 
 }

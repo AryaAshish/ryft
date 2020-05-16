@@ -28,6 +28,7 @@ import androidx.annotation.Nullable;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -77,6 +78,7 @@ public class EditProfileActivity<V extends EditProfileView, P extends EditProfil
     LinearLayout verifyLayout;
     ProgressDialog pd;
 
+    //public Uri imageUri;
     int i = 1;
 
     @Override
@@ -408,6 +410,10 @@ public class EditProfileActivity<V extends EditProfileView, P extends EditProfil
 
     @Override
     public void setProfilePhoto(String photoUrl) {
+
+        //Log.i("url",photoUrl);
+
+        //imageUri = Uri.parse(photoUrl);
         ImageUtil.loadImage(GlideApp.with(this), photoUrl, imageView, new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {

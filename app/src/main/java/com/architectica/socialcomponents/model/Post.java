@@ -42,6 +42,7 @@ public class Post implements Serializable, LazyLoading {
     private long watchersCount;
     private boolean hasComplain;
     private ItemType itemType;
+    private String contentType;
 
     public Post() {
         this.createdDate = new Date().getTime();
@@ -152,6 +153,7 @@ public class Post implements Serializable, LazyLoading {
         result.put("watchersCount", watchersCount);
         result.put("hasComplain", hasComplain);
         result.put("createdDateText", FormatterUtil.getFirebaseDateFormat().format(new Date(createdDate)));
+        result.put("contentType",contentType);
 
         return result;
     }
@@ -164,5 +166,13 @@ public class Post implements Serializable, LazyLoading {
     @Override
     public void setItemType(ItemType itemType) {
 
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 }

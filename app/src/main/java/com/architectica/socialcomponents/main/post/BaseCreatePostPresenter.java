@@ -28,6 +28,8 @@ import com.architectica.socialcomponents.managers.listeners.OnPostCreatedListene
 import com.architectica.socialcomponents.utils.LogUtil;
 import com.architectica.socialcomponents.utils.ValidationUtil;
 
+import java.util.List;
+
 /**
  * Created by Alexey on 03.05.18.
  */
@@ -45,7 +47,7 @@ public abstract class BaseCreatePostPresenter<V extends BaseCreatePostView> exte
     @StringRes
     protected abstract int getSaveFailMessage();
 
-    protected abstract void savePost(final String title, final String description);
+    protected abstract void savePost(final String title, final String description, final List<String> hashtags);
 
     protected abstract boolean isImageRequired();
 
@@ -57,6 +59,8 @@ public abstract class BaseCreatePostPresenter<V extends BaseCreatePostView> exte
 
             String title = view.getTitleText().trim();
             String description = view.getDescriptionText().trim();
+
+            List<String> hashtags = view.getHashtagsList();
 
             boolean cancel = false;
 
@@ -82,7 +86,7 @@ public abstract class BaseCreatePostPresenter<V extends BaseCreatePostView> exte
             if (!cancel) {
                 creatingPost = true;
                 view.hideKeyboard();
-                savePost(title, description);
+                savePost(title, description, hashtags);
             }
         });
     }

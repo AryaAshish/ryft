@@ -20,8 +20,6 @@ public interface ProfileView extends BaseFragmentView {
 
     void setFollowStateChangeResultOk();
 
-    void openPostDetailsActivity(Post post, View postItemView);
-
     void startEditProfileActivity();
 
     void openCreatePostActivity();
@@ -34,23 +32,22 @@ public interface ProfileView extends BaseFragmentView {
 
     void setSkill(String skill);
 
+    void setCredits(long credits);
+
     void setProfilePhoto(String photoUrl);
 
     void setDefaultProfilePhoto();
 
     void updateLikesCounter(Spannable text);
 
-    void hideLoadingPostsProgress();
-
-    void showLikeCounter(boolean show);
-
-    void updatePostsCounter(Spannable text);
-
-    void showPostCounter(boolean show);
-
     void onPostRemoved();
 
     void onPostUpdated();
 
+    void showLikeCounter(boolean show);
+
+    void showPostCounter(boolean show);
+
+    void updatePostsCounter(Spannable text);
 
 }

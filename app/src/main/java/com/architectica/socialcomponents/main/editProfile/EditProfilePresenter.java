@@ -19,6 +19,7 @@ package com.architectica.socialcomponents.main.editProfile;
 import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.architectica.socialcomponents.R;
@@ -83,6 +84,8 @@ public class EditProfilePresenter<V extends EditProfileView> extends PickImagePr
                 String useruri = view.getUseruriText().trim();
                 String number = view.getNumber().trim();
                 String skill = view.getSkill();
+
+                Log.i("uri","" + imageUri);
 
                 boolean cancel = true;
 

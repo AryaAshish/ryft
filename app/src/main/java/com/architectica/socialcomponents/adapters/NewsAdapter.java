@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.model.Article;
 import com.architectica.socialcomponents.utils.NewsUtils;
+import com.bumptech.glide.Glide;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -41,7 +42,9 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull NewsAdapter.MyViewHolder viewHolder, int i) {
 
-        Picasso.with(context).load(articles.get(i).getUrlToImage()).into(viewHolder.imageView);
+        //Picasso.with(context).load(articles.get(i).getUrlToImage()).into(viewHolder.imageView);
+
+        Glide.with(context).load(articles.get(i).getUrlToImage()).into(viewHolder.imageView);
 
         viewHolder.title.setText(articles.get(i).getTitle());
         viewHolder.desc.setText(articles.get(i).getDescription());

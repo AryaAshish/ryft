@@ -23,14 +23,18 @@ import com.architectica.socialcomponents.main.post.BaseCreatePostPresenter;
 import com.architectica.socialcomponents.managers.PostManager;
 import com.architectica.socialcomponents.managers.listeners.OnPostChangedListener;
 import com.architectica.socialcomponents.model.Post;
+import com.architectica.socialcomponents.model.Project;
+
+import java.util.List;
 
 /**
  * Created by Alexey on 03.05.18.
  */
 
-class EditPostPresenter extends BaseCreatePostPresenter<EditPostView> {
+public class EditPostPresenter extends BaseCreatePostPresenter<EditPostView> {
 
     private Post post;
+    //private Project project;
 
     EditPostPresenter(Context context) {
         super(context);
@@ -69,21 +73,24 @@ class EditPostPresenter extends BaseCreatePostPresenter<EditPostView> {
     }
 
     @Override
-    protected void savePost(final String title, final String description) {
+    protected void savePost(final String title, final String description, final List<String> hashtags) {
         ifViewAttached(view -> {
             view.showProgress(R.string.message_saving);
 
             post.setTitle(title);
             post.setDescription(description);
+            //post.setStatus("not-verified");
 
             if (view.getImageUri() != null) {
-                postManager.createOrUpdatePostWithImage(view.getImageUri(), this, post);
+                postManager.createOrUpdatePostWithImage(view.getImageUri(), this, post,hashtags);
             } else {
-                postManager.createOrUpdatePost(post);
+                postManager.createPost(this,post,hashtags);
                 onPostSaved(true);
             }
         });
     }
+
+
 
     public void addCheckIsPostChangedListener() {
         PostManager.getInstance(context.getApplicationContext()).getPost(context, post.getId(), new OnPostChangedListener() {

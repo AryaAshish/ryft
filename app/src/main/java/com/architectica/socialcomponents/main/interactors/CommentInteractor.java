@@ -48,6 +48,7 @@ public class CommentInteractor {
     private static final String TAG = CommentInteractor.class.getSimpleName();
     private static CommentInteractor instance;
 
+    private ProfileInteractor profileInteractor;
     private DatabaseHelper databaseHelper;
     private Context context;
 
@@ -62,12 +63,16 @@ public class CommentInteractor {
     private CommentInteractor(Context context) {
         this.context = context;
         databaseHelper = ApplicationHelper.getDatabaseHelper();
+        profileInteractor = ProfileInteractor.getInstance(context);
     }
 
     public void createComment(String commentText, final String postId, final OnTaskCompleteListener onTaskCompleteListener) {
         try {
             String authorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            DatabaseReference mCommentsReference = databaseHelper.getDatabaseReference().child(DatabaseHelper.POST_COMMENTS_DB_KEY + "/" + postId);
+            DatabaseReference mCommentsReference;
+
+            mCommentsReference = databaseHelper.getDatabaseReference().child(DatabaseHelper.POST_COMMENTS_DB_KEY + "/" + postId);
+
             String commentId = mCommentsReference.push().getKey();
             Comment comment = new Comment(commentText);
             comment.setId(commentId);
@@ -77,6 +82,7 @@ public class CommentInteractor {
                 @Override
                 public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                     if (databaseError == null) {
+                        profileInteractor.addCredits(2);
                         incrementCommentsCount(postId);
                     } else {
                         LogUtil.logError(TAG, databaseError.getMessage(), databaseError.toException());
@@ -84,7 +90,10 @@ public class CommentInteractor {
                 }
 
                 private void incrementCommentsCount(String postId) {
-                    DatabaseReference postRef = databaseHelper.getDatabaseReference().child(DatabaseHelper.POSTS_DB_KEY + "/" + postId + "/commentsCount");
+                    DatabaseReference postRef;
+
+                    postRef = databaseHelper.getDatabaseReference().child(DatabaseHelper.POSTS_DB_KEY + "/" + postId + "/commentsCount");
+
                     postRef.runTransaction(new Transaction.Handler() {
                         @Override
                         public Transaction.Result doTransaction(MutableData mutableData) {
@@ -113,8 +122,68 @@ public class CommentInteractor {
         }
     }
 
+    public void createProjectComment(String commentText, final String postId, final OnTaskCompleteListener onTaskCompleteListener) {
+        try {
+            String authorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DatabaseReference mCommentsReference;
+
+            mCommentsReference = databaseHelper.getDatabaseReference().child(DatabaseHelper.PROJECT_COMMENTS_DB_KEY + "/" + postId);
+
+
+            String commentId = mCommentsReference.push().getKey();
+            Comment comment = new Comment(commentText);
+            comment.setId(commentId);
+            comment.setAuthorId(authorId);
+
+            mCommentsReference.child(commentId).setValue(comment, new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                    if (databaseError == null) {
+                        profileInteractor.addCredits(2);
+                        incrementProjectCommentsCount(postId);
+                    } else {
+                        LogUtil.logError(TAG, databaseError.getMessage(), databaseError.toException());
+                    }
+                }
+
+                private void incrementProjectCommentsCount(String postId) {
+                    DatabaseReference postRef;
+
+                    postRef = databaseHelper.getDatabaseReference().child(DatabaseHelper.PROJECTS_DB_KEY + "/" + postId + "/commentsCount");
+
+                    postRef.runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            Integer currentValue = mutableData.getValue(Integer.class);
+                            if (currentValue == null) {
+                                mutableData.setValue(1);
+                            } else {
+                                mutableData.setValue(currentValue + 1);
+                            }
+
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                            LogUtil.logInfo(TAG, "Updating comments count transaction is completed.");
+                            if (onTaskCompleteListener != null) {
+                                onTaskCompleteListener.onTaskComplete(true);
+                            }
+                        }
+                    });
+                }
+            });
+        } catch (Exception e) {
+            LogUtil.logError(TAG, "createComment()", e);
+        }
+    }
+
+
     public void updateComment(String commentId, String commentText, String postId, final OnTaskCompleteListener onTaskCompleteListener) {
-        DatabaseReference mCommentReference = databaseHelper.getDatabaseReference().child(DatabaseHelper.POST_COMMENTS_DB_KEY).child(postId).child(commentId).child("text");
+        DatabaseReference mCommentReference;
+        mCommentReference = databaseHelper.getDatabaseReference().child(DatabaseHelper.POST_COMMENTS_DB_KEY).child(postId).child(commentId).child("text");
+
         mCommentReference.setValue(commentText).addOnSuccessListener(aVoid -> {
             if (onTaskCompleteListener != null) {
                 onTaskCompleteListener.onTaskComplete(true);
@@ -127,10 +196,31 @@ public class CommentInteractor {
         });
     }
 
+    public void updateProjectComment(String commentId, String commentText, String postId, final OnTaskCompleteListener onTaskCompleteListener) {
+        DatabaseReference mCommentReference;
+
+        mCommentReference = databaseHelper.getDatabaseReference().child(DatabaseHelper.PROJECT_COMMENTS_DB_KEY).child(postId).child(commentId).child("text");
+
+        mCommentReference.setValue(commentText).addOnSuccessListener(aVoid -> {
+            if (onTaskCompleteListener != null) {
+                onTaskCompleteListener.onTaskComplete(true);
+            }
+        }).addOnFailureListener(e -> {
+            if (onTaskCompleteListener != null) {
+                onTaskCompleteListener.onTaskComplete(false);
+            }
+            LogUtil.logError(TAG, "updateComment", e);
+        });
+    }
+
+
     public void decrementCommentsCount(String postId, final OnTaskCompleteListener onTaskCompleteListener) {
-        DatabaseReference postRef = databaseHelper
+        DatabaseReference postRef;
+
+        postRef = databaseHelper
                 .getDatabaseReference()
                 .child(DatabaseHelper.POSTS_DB_KEY + "/" + postId + "/commentsCount");
+
         postRef.runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
@@ -152,12 +242,61 @@ public class CommentInteractor {
         });
     }
 
+    public void decrementProjectCommentsCount(String postId, final OnTaskCompleteListener onTaskCompleteListener) {
+        DatabaseReference postRef;
+
+        postRef = databaseHelper
+                .getDatabaseReference()
+                .child(DatabaseHelper.PROJECTS_DB_KEY + "/" + postId + "/commentsCount");
+
+        postRef.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                Integer currentValue = mutableData.getValue(Integer.class);
+                if (currentValue != null && currentValue >= 1) {
+                    mutableData.setValue(currentValue - 1);
+                }
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                LogUtil.logInfo(TAG, "Updating comments count transaction is completed.");
+                if (onTaskCompleteListener != null) {
+                    onTaskCompleteListener.onTaskComplete(true);
+                }
+            }
+        });
+    }
+
+
     public void removeComment(String commentId, final String postId, final OnTaskCompleteListener onTaskCompleteListener) {
-        DatabaseReference reference = databaseHelper
+
+        DatabaseReference reference;
+
+        reference = databaseHelper
                 .getDatabaseReference()
                 .child(DatabaseHelper.POST_COMMENTS_DB_KEY)
                 .child(postId)
                 .child(commentId);
+
+        reference.removeValue().addOnSuccessListener(aVoid -> decrementCommentsCount(postId, onTaskCompleteListener)).addOnFailureListener(e -> {
+            onTaskCompleteListener.onTaskComplete(false);
+            LogUtil.logError(TAG, "removeComment()", e);
+        });
+    }
+
+    public void removeProjectComment(String commentId, final String postId, final OnTaskCompleteListener onTaskCompleteListener) {
+
+        DatabaseReference reference;
+
+        reference = databaseHelper
+                .getDatabaseReference()
+                .child(DatabaseHelper.PROJECT_COMMENTS_DB_KEY)
+                .child(postId)
+                .child(commentId);
+
         reference.removeValue().addOnSuccessListener(aVoid -> decrementCommentsCount(postId, onTaskCompleteListener)).addOnFailureListener(e -> {
             onTaskCompleteListener.onTaskComplete(false);
             LogUtil.logError(TAG, "removeComment()", e);
@@ -165,10 +304,13 @@ public class CommentInteractor {
     }
 
     public ValueEventListener getCommentsList(String postId, final OnDataChangedListener<Comment> onDataChangedListener) {
-        DatabaseReference databaseReference = databaseHelper
+        DatabaseReference databaseReference;
+
+        databaseReference = databaseHelper
                 .getDatabaseReference()
                 .child(DatabaseHelper.POST_COMMENTS_DB_KEY)
                 .child(postId);
+
         ValueEventListener valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -194,12 +336,59 @@ public class CommentInteractor {
         return valueEventListener;
     }
 
+    public ValueEventListener getProjectCommentsList(String postId, final OnDataChangedListener<Comment> onDataChangedListener) {
+        DatabaseReference databaseReference;
+
+        databaseReference = databaseHelper
+                .getDatabaseReference()
+                .child(DatabaseHelper.PROJECT_COMMENTS_DB_KEY)
+                .child(postId);
+
+        ValueEventListener valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Comment> list = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Comment comment = snapshot.getValue(Comment.class);
+                    list.add(comment);
+                }
+
+                Collections.sort(list, (lhs, rhs) -> ((Long) rhs.getCreatedDate()).compareTo((Long) lhs.getCreatedDate()));
+
+                onDataChangedListener.onListChanged(list);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                LogUtil.logError(TAG, "getCommentsList(), onCancelled", new Exception(databaseError.getMessage()));
+            }
+        });
+
+        databaseHelper.addActiveListener(valueEventListener, databaseReference);
+        return valueEventListener;
+    }
+
+
     public Task<Void> removeCommentsByPost(String postId) {
+
         return databaseHelper
                 .getDatabaseReference()
                 .child(DatabaseHelper.POST_COMMENTS_DB_KEY)
                 .child(postId)
                 .removeValue();
+
     }
+
+    public Task<Void> removeCommentsByProject(String postId) {
+
+        return databaseHelper
+                .getDatabaseReference()
+                .child(DatabaseHelper.PROJECT_COMMENTS_DB_KEY)
+                .child(postId)
+                .removeValue();
+
+    }
+
 
 }

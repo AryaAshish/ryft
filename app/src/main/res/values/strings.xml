@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Rift</string>
     <string name="label_create_post_activity">Create post</string>
+    <string name="label_create_project_activity">Create project</string>
     <string name="label_post_detail_activity">Post detail</string>
     <string name="label_image_detail_activity">Image</string>
     <string name="title_activity_login">Sign in</string>
@@ -23,6 +24,8 @@
 
     <string name="menu_profile">Profile</string>
 
+    <string name="menu_projects">Projects</string>
+
     <string name="menu_notifications">Notifications</string>
 
     <string name="text_take_photo">Take photo</string>
@@ -33,17 +36,28 @@
     <string name="channel_name">Archcrony</string>
     <string name="channel_description">Archcrony notifications</string>
 
+    <string name="long_duration">Max. allowed duration of a video is 3 minutes.</string>
+
     <string name="hint_title">Title</string>
+    <string name="hint_question">Write your question here</string>
+    <string name="hint_answer">Write your answer here</string>
     <string name="hint_description">Write description about your post...</string>
+    <string name="hint_project_description">Write description about your project...</string>
 
     <string name="message_post_was_created">Post was created</string>
+    <string name="message_project_was_created">Project was created</string>
+    <string name="message_reward_was_created">Reward was created</string>
     <string name="error_fail_create_post">Fail to create post</string>
+    <string name="error_fail_create_project">Fail to create project</string>
+    <string name="error_fail_create_reward">Fail to create reward</string>
     <string name="error_fail_load_image">Fail to load image</string>
     <string name="error_fail_crop_image">Fail to crop image</string>
     <string name="error_smaller_image">Image is too small. Required image size 100x100 px</string>
     <string name="error_incorrect_file_type">Incorrect file type</string>
     <string name="error_bigger_file">File size is bigger than 10Mb</string>
     <string name="message_creating_post">Creating post …</string>
+    <string name="message_creating_project">Creating project …</string>
+    <string name="message_creating_offer">Creating offer …</string>
     <string name="message_saving">Saving …</string>
     <string name="warning_empty_image">Image is required</string>
     <string name="warning_empty_title">Title is required</string>
@@ -52,9 +66,17 @@
     <string name="error_fail_remove_post">Fail to remove post</string>
     <string name="error_skill">Entered skill not found.Try another</string>
     <string name="message_post_was_removed">Post was removed</string>
+    <string name="message_project_was_removed">Project was removed</string>
+    <string name="message_reward_was_removed">Reward was removed</string>
     <string name="error_fail_update_post">Fail to update post</string>
+    <string name="error_fail_update_project">Fail to update project</string>
+    <string name="error_fail_update_reward">Fail to update reward</string>
     <string name="error_post_was_removed">Post was removed</string>
+    <string name="error_project_was_removed">Project was removed</string>
+    <string name="error_reward_was_removed">Reward was removed</string>
     <string name="confirm_deletion_post">Delete this post?</string>
+    <string name="confirm_deletion_project">Delete this project?</string>
+    <string name="confirm_deletion_reward">Delete this reward?</string>
 
     <string name="comment_text_hint">Enter your comment...</string>
     <string name="button_post_comment">Post comment</string>
@@ -93,6 +115,8 @@
     <string name="removing">Removing …</string>
     <string name="error_general">Somthing went wrong.</string>
     <string name="error_general_post">Somthing went wrong with post, id: %1$s</string>
+    <string name="error_general_project">Somthing went wrong with project, id: %1$s</string>
+    <string name="error_general_reward">Somthing went wrong with offer, id: %1$s</string>
     <string name="internet_connection_failed">No internet connection</string>
     <string name="press_once_again_to_exit">Press once again to exit</string>
 
@@ -149,6 +173,7 @@
     <string name="post_image_transition_name" translatable="false">post_image_transition</string>
     <string name="post_author_image_transition_name" translatable="false">post_author_image_transition_name</string>
     <string name="message_new_post_was_created">New post was created</string>
+    <string name="message_new_project_was_created">New project was created. It will be displayed once the admin verifies your project</string>
 
     <plurals name="new_posts_counter_format">
         <item quantity="one">%1$d new post</item>
@@ -192,6 +217,11 @@
     <!--Notifications-->
     <string name="new_like_channel_name">New Like</string>
     <string name="new_comment_channel_name">New Comment</string>
+    <string name="new_message_channel_name">New Message</string>
+    <string name="new_group_message_channel_name">New Group Message</string>
+    <string name="new_response_channel_name">New Response</string>
+    <string name="new_selection_channel_name">New Selection</string>
+
 
 
 </resources>

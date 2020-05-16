@@ -18,10 +18,13 @@ package com.architectica.socialcomponents.main.post.createPost;
 
 import android.content.Context;
 
+import com.architectica.socialcomponents.model.Project;
 import com.google.firebase.auth.FirebaseAuth;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.main.post.BaseCreatePostPresenter;
 import com.architectica.socialcomponents.model.Post;
+
+import java.util.List;
 
 /**
  * Created by Alexey on 03.05.18.
@@ -39,7 +42,7 @@ public class CreatePostPresenter extends BaseCreatePostPresenter<CreatePostView>
     }
 
     @Override
-    protected void savePost(String title, String description) {
+    protected void savePost(String title, String description, List<String> hashtags) {
         ifViewAttached(view -> {
             view.showProgress(R.string.message_creating_post);
             Post post = new Post();
@@ -49,12 +52,12 @@ public class CreatePostPresenter extends BaseCreatePostPresenter<CreatePostView>
 
             if (view.getImageUri() != null){
 
-                postManager.createOrUpdatePostWithImage(view.getImageUri(), this, post);
+                postManager.createOrUpdatePostWithImage(view.getImageUri(), this, post, hashtags);
 
             }
             else {
 
-                postManager.createPost(this,post);
+                postManager.createPost(this,post, hashtags);
 
             }
 

@@ -22,6 +22,8 @@ import android.net.Uri;
 import androidx.annotation.Nullable;
 import android.util.Log;
 import android.widget.ImageView;
+
+import com.architectica.socialcomponents.model.Project;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -36,6 +38,8 @@ import com.architectica.socialcomponents.model.FollowingPost;
 import com.architectica.socialcomponents.model.Like;
 import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.utils.*;
+
+import java.util.List;
 
 /**
  * Created by Kristina on 10/28/16.
@@ -64,7 +68,7 @@ public class PostManager extends FirebaseListenersManager {
         postInteractor = PostInteractor.getInstance(context);
     }
 
-    public void createOrUpdatePost(Post post) {
+    /*public void createOrUpdatePost(Post post) {
         try {
             postInteractor.createOrUpdatePost(post);
         } catch (Exception e) {
@@ -72,16 +76,44 @@ public class PostManager extends FirebaseListenersManager {
         }
     }
 
+    public void createOrUpdateProject(Project post) {
+        try {
+            postInteractor.createOrUpdateProject(post);
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }*/
+
     public void getPostsList(OnPostListChangedListener<Post> onDataChangedListener, long date) {
         postInteractor.getPostList(onDataChangedListener, date);
+    }
+
+    public void getHashtagPostsList(String hashtag,OnPostListChangedListener<Post> onDataChangedListener, long date) {
+        postInteractor.getHashtagPostList(hashtag,onDataChangedListener, date);
+    }
+
+    public void getRewardsPostsList(OnPostListChangedListener<Post> onDataChangedListener, long date) {
+        postInteractor.getRewardsPostList(onDataChangedListener, date);
     }
 
     public void getAdminPostsList(OnPostListChangedListener<Post> onDataChangedListener, long date) {
         postInteractor.getAdminPostList(onDataChangedListener, date);
     }
 
+    public void getProjectsList(OnPostListChangedListener<Post> onDataChangedListener, long date){
+        postInteractor.getProjectsList(onDataChangedListener, date);
+    }
+
+    public void getAllProjectsList(OnPostListChangedListener<Post> onDataChangedListener, long date){
+        postInteractor.getAllProjectsList(onDataChangedListener, date);
+    }
+
     public void getPostsListByUser(OnDataChangedListener<Post> onDataChangedListener, String userId) {
         postInteractor.getPostListByUser(onDataChangedListener, userId);
+    }
+
+    public void getProjectsListByUser(OnDataChangedListener<Post> onDataChangedListener, String userId) {
+        postInteractor.getProjectsListByUser(onDataChangedListener, userId);
     }
 
     public void getPost(Context context, String postId, OnPostChangedListener onPostChangedListener) {
@@ -89,23 +121,57 @@ public class PostManager extends FirebaseListenersManager {
         addListenerToMap(context, valueEventListener);
     }
 
+    public void getProject(Context context, String postId, OnPostChangedListener onPostChangedListener) {
+        ValueEventListener valueEventListener = postInteractor.getProject(postId, onPostChangedListener);
+        addListenerToMap(context, valueEventListener);
+    }
+
+    public void getReward(Context context, String postId, OnPostChangedListener onPostChangedListener) {
+        ValueEventListener valueEventListener = postInteractor.getReward(postId, onPostChangedListener);
+        addListenerToMap(context, valueEventListener);
+    }
+
     public void getSinglePostValue(String postId, OnPostChangedListener onPostChangedListener) {
         postInteractor.getSinglePost(postId, onPostChangedListener);
     }
 
-    public void createOrUpdatePostWithImage(Uri imageUri, final OnPostCreatedListener onPostCreatedListener, final Post post) {
-        postInteractor.createOrUpdatePostWithImage(imageUri, onPostCreatedListener, post);
+    public void createOrUpdatePostWithImage(Uri imageUri, final OnPostCreatedListener onPostCreatedListener, final Post post, final List<String> hashtags) {
+        postInteractor.createOrUpdatePostWithImage(imageUri, onPostCreatedListener, post, hashtags);
     }
 
-    public void createPost(final OnPostCreatedListener onPostCreatedListener, final Post post){
+    public void createPost(final OnPostCreatedListener onPostCreatedListener, final Post post,final List<String> hashtags){
 
-        postInteractor.createPost(onPostCreatedListener, post);
+        postInteractor.createPost(onPostCreatedListener, post, hashtags);
+
+    }
+
+    public void createOrUpdateProjectWithImage(Uri imageUri, final OnProjectCreatedListener onPostCreatedListener, final Project post, final List<String> hashtags) {
+        postInteractor.createOrUpdateProjectWithImage(imageUri, onPostCreatedListener, post, hashtags);
+    }
+
+    public void createProject(final OnProjectCreatedListener onPostCreatedListener, final Project post,final List<String> hashtags){
+
+        postInteractor.createProject(onPostCreatedListener, post, hashtags);
+
+    }
+
+    public void createOrUpdateRewardWithImage(Uri imageUri, final OnRewardCreatedListener onPostCreatedListener, final Post post) {
+        postInteractor.createOrUpdateRewardWithImage(imageUri, onPostCreatedListener, post);
+    }
+
+    public void createReward(final OnRewardCreatedListener onPostCreatedListener, final Post post){
+
+        postInteractor.createReward(onPostCreatedListener, post);
 
     }
 
 
     public void removePost(final Post post, final OnTaskCompleteListener onTaskCompleteListener) {
         postInteractor.removePost(post, onTaskCompleteListener);
+    }
+
+    public void removeProject(final Post post, final OnTaskCompleteListener onTaskCompleteListener) {
+        postInteractor.removeProject(post, onTaskCompleteListener);
     }
 
     public void addComplain(Post post) {
@@ -117,6 +183,11 @@ public class PostManager extends FirebaseListenersManager {
         addListenerToMap(activityContext, valueEventListener);
     }
 
+    public void hasCurrentUserProjectLike(Context activityContext, String postId, String userId, final OnObjectExistListener<Like> onObjectExistListener) {
+        ValueEventListener valueEventListener = postInteractor.hasCurrentUserProjectLike(postId, userId, onObjectExistListener);
+        addListenerToMap(activityContext, valueEventListener);
+    }
+
     public void hasCurrentUserLikeSingleValue(String postId, String userId, final OnObjectExistListener<Like> onObjectExistListener) {
         postInteractor.hasCurrentUserLikeSingleValue(postId, userId, onObjectExistListener);
     }
@@ -125,8 +196,16 @@ public class PostManager extends FirebaseListenersManager {
         postInteractor.isPostExistSingleValue(postId, onObjectExistListener);
     }
 
+    /*public void isProjectExistSingleValue(String postId, final OnObjectExistListener<Post> onObjectExistListener) {
+        postInteractor.isProjectExistSingleValue(postId, onObjectExistListener);
+    }*/
+
     public void incrementWatchersCount(String postId) {
         postInteractor.incrementWatchersCount(postId);
+    }
+
+    public void incrementProjectWatchersCount(String postId) {
+        postInteractor.incrementProjectWatchersCount(postId);
     }
 
     public void incrementNewPostsCounter() {

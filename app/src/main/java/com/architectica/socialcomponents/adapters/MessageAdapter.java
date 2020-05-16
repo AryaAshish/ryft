@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.model.Messages;
 import com.architectica.socialcomponents.views.CircularImageView;
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -65,6 +66,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
         public TextView messageText;
+        public TextView downloadText;
         public CircularImageView profileImage;
         public TextView displayName;
         public ImageView messageImage;
@@ -73,6 +75,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             super(view);
 
             messageText = (TextView) view.findViewById(R.id.message_text_layout);
+            downloadText = (TextView) view.findViewById(R.id.message_download_layout);
             profileImage = (CircularImageView) view.findViewById(R.id.message_profile_layout);
             displayName = (TextView) view.findViewById(R.id.name_text_layout);
             messageImage = (ImageView) view.findViewById(R.id.message_image_layout);
@@ -100,8 +103,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
                 viewHolder.displayName.setText(name);
 
-                Picasso.with(viewHolder.profileImage.getContext()).load(image)
-                        .placeholder(R.drawable.default_avatar).into(viewHolder.profileImage);
+                /*Picasso.with(viewHolder.profileImage.getContext()).load(image)
+                        .placeholder(R.drawable.default_avatar).into(viewHolder.profileImage);*/
+
+                Glide.with(activity).load(image).placeholder(R.drawable.default_avatar).into(viewHolder.profileImage);
 
             }
 
@@ -113,6 +118,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         if(message_type.equals("text")) {
 
+            viewHolder.downloadText.setVisibility(View.GONE);
+            viewHolder.messageText.setVisibility(View.VISIBLE);
             viewHolder.messageText.setText(c.getMessage());
             viewHolder.messageImage.setVisibility(View.INVISIBLE);
 
@@ -122,10 +129,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             /*viewHolder.messageText.setVisibility(View.INVISIBLE);
             Picasso.with(viewHolder.profileImage.getContext()).load(c.getMessage())
                     .placeholder(R.drawable.default_avatar).into(viewHolder.messageImage);*/
-
+            viewHolder.downloadText.setVisibility(View.VISIBLE);
+            viewHolder.messageText.setVisibility(View.GONE);
             viewHolder.messageText.setText(c.getMessage());
-            viewHolder.messageText.setClickable(true);
-            viewHolder.messageText.setOnClickListener(new View.OnClickListener() {
+            viewHolder.downloadText.setClickable(true);
+            viewHolder.downloadText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 

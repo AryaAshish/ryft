@@ -77,4 +77,5 @@ public abstract class BasePostsAdapter extends RecyclerView.Adapter<RecyclerView
             PostManager.getInstance(activity).getSinglePostValue(selectedPost.getId(), createOnPostChangeListener(selectedPostPosition));
         }
     }
+
 }

@@ -59,6 +59,9 @@
                         android:alpha=".8"
                         android:textSize="12sp" />
                 </LinearLayout>
+
+
+
             </LinearLayout>
 
             <ImageView
@@ -66,6 +69,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/post_list_item_image_height"
                 android:scaleType="centerCrop" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+
+                <com.google.android.exoplayer2.ui.PlayerView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:id="@+id/postVideoView"
+                    android:visibility="gone"
+                    android:background="@color/black"
+                    app:resize_mode="fill">
+
+                </com.google.android.exoplayer2.ui.PlayerView>
+
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -88,7 +108,7 @@
                     android:paddingRight="@dimen/intrinsic_padding"
                     android:textAppearance="@style/TextAppearance.Title" />
 
-                <TextView
+              <!--  <TextView
                     android:id="@+id/detailsTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -99,7 +119,21 @@
                     android:maxLines="2"
                     android:paddingLeft="@dimen/intrinsic_padding"
                     android:paddingRight="@dimen/intrinsic_padding"
-                    android:textAppearance="@style/TextAppearance.Second" />
+                    android:textAppearance="@style/TextAppearance.Second" />-->
+
+                <com.hendraanggrian.appcompat.widget.SocialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detailsTextView"
+                    android:layout_below="@+id/titleTextView"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@+id/authorImageView"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:paddingLeft="@dimen/intrinsic_padding"
+                    android:paddingRight="@dimen/intrinsic_padding"
+                    android:textAppearance="@style/TextAppearance.Second"/>
+
             </LinearLayout>
 
             <include

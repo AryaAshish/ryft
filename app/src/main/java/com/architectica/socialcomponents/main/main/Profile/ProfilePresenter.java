@@ -103,22 +103,12 @@ public class ProfilePresenter extends BasePresenter<ProfileView> {
     }
 
     public void getFollowingsCount(String targetUserId) {
+
         followManager.getFollowingsCount(context, targetUserId, count -> {
             ifViewAttached(view -> view.updateFollowingsCount((int) count));
         });
     }
 
-    void onPostClick(Post post, View postItemView) {
-        PostManager.getInstance(context).isPostExistSingleValue(post.getId(), exist -> {
-            ifViewAttached(view -> {
-                if (exist) {
-                    view.openPostDetailsActivity(post, postItemView);
-                } else {
-                    view.showSnackBar(R.string.error_post_was_removed);
-                }
-            });
-        });
-    }
 
     public Spannable buildCounterSpannable(String label, int value) {
         SpannableStringBuilder contentString = new SpannableStringBuilder();
@@ -152,6 +142,7 @@ public class ProfilePresenter extends BasePresenter<ProfileView> {
                     view.setBio(profile.getUserbio());
                     view.setStatus(profile.getStatus());
                     view.setSkill(profile.getSkill());
+                    view.setCredits(profile.getCredits());
                     if (profile.getPhotoUrl() != null) {
                         view.setProfilePhoto(profile.getPhotoUrl());
                     } else {
@@ -162,17 +153,6 @@ public class ProfilePresenter extends BasePresenter<ProfileView> {
                     view.updateLikesCounter(buildCounterSpannable(likesLabel, likesCount));
                 });
             }
-        });
-    }
-
-    public void onPostListChanged(int postsCount) {
-        ifViewAttached(view -> {
-            String postsLabel = context.getResources().getQuantityString(R.plurals.posts_counter_format, postsCount, postsCount);
-            view.updatePostsCounter(buildCounterSpannable(postsLabel, postsCount));
-            view.showLikeCounter(true);
-            view.showPostCounter(true);
-            view.hideLoadingPostsProgress();
-
         });
     }
 
@@ -189,4 +169,37 @@ public class ProfilePresenter extends BasePresenter<ProfileView> {
             }
         });
     }
+
+    public void onPostListChanged(int postsCount) {
+        ifViewAttached(view -> {
+            String postsLabel = context.getResources().getQuantityString(R.plurals.posts_counter_format, postsCount, postsCount);
+            view.updatePostsCounter(buildCounterSpannable(postsLabel, postsCount));
+            view.showLikeCounter(true);
+            view.showPostCounter(true);
+            //view.hideLoadingPostsProgress();
+
+        });
+    }
+
+   /* public void showLikes(){
+
+        ifViewAttached(view -> {
+
+            view.showLikeCounter(true);
+
+        });
+
+    }
+
+    public void showPosts(){
+
+        ifViewAttached(view -> {
+
+            view.showPostCounter(true);
+
+        });
+
+    }*/
+
+
 }

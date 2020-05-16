@@ -17,19 +17,26 @@
 package com.architectica.socialcomponents.main.profile;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager.widget.ViewPager;
+
 import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.TextAppearanceSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -40,15 +47,19 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.architectica.socialcomponents.ApplicationHelper;
 import com.architectica.socialcomponents.main.Chat.ChatActivity;
+import com.architectica.socialcomponents.main.main.Profile.PostsByUserFragment;
+import com.architectica.socialcomponents.main.main.Profile.ProjectsByUserFragment;
+import com.architectica.socialcomponents.managers.DatabaseHelper;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.architectica.socialcomponents.R;
@@ -72,6 +83,14 @@ import com.architectica.socialcomponents.utils.ImageUtil;
 import com.architectica.socialcomponents.utils.LogUtil;
 import com.architectica.socialcomponents.utils.LogoutHelper;
 import com.architectica.socialcomponents.views.FollowButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter> implements ProfileView, GoogleApiClient.OnConnectionFailedListener, UnfollowConfirmationDialog.Callback {
     private static final String TAG = ProfileActivity.class.getSimpleName();
@@ -80,6 +99,7 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
 
     // UI references.
     private TextView nameEditText;
+    private TextView creditsText;
     private TextView bioTextView;
     private TextView statusTextView;
     private TextView skillTextView;
@@ -87,7 +107,7 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private TextView postsCounterTextView;
-    private ProgressBar postsProgressBar;
+    //private ProgressBar postsProgressBar;
 
     private FirebaseAuth mAuth;
     private GoogleApiClient mGoogleApiClient;
@@ -102,6 +122,10 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
     private TextView followingsCounterTextView,meesagePro;
     private FollowButton followButton;
     private Button editProfile;
+
+    private TabLayout tabs;
+
+    private TextView creditsTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,17 +147,27 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
             currentUserId =String.valueOf(firebaseUser.getUid()) ;
         }
 
-        if (currentUserId=="null" || currentUserId ==null){
+        /*if (currentUserId=="null" || currentUserId ==null){
             Intent intent=new Intent(getApplicationContext(),LoginActivity.class);
             startActivity(intent);
             finish();
         }
         //Toast.makeText(getApplicationContext(),String.valueOf(currentUserId)+" "+String.valueOf(userID),Toast.LENGTH_SHORT).show();
 
+        Log.i("userid",currentUserId);*/
+
+        tabs = (TabLayout) findViewById(R.id.result_tabs);
+        // Setting ViewPager for each Tabs
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        setupViewPager(viewPager);
+        // Set Tabs inside Toolbar
+        tabs.setupWithViewPager(viewPager);
+
         // Set up the login form.
         progressBar = findViewById(R.id.progressBar);
         imageView = findViewById(R.id.imageView);
         nameEditText = findViewById(R.id.nameEditText);
+        creditsText = findViewById(R.id.credits);
         bioTextView = findViewById(R.id.bio);
         statusTextView = findViewById(R.id.status);
         skillTextView = findViewById(R.id.skill);
@@ -141,7 +175,7 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
         likesCountersTextView = findViewById(R.id.likesCountersTextView);
         followersCounterTextView = findViewById(R.id.followersCounterTextView);
         followingsCounterTextView = findViewById(R.id.followingsCounterTextView);
-        postsProgressBar = findViewById(R.id.postsProgressBar);
+        //postsProgressBar = findViewById(R.id.postsProgressBar);
         followButton = findViewById(R.id.followButton);
        // swipeContainer = findViewById(R.id.swipeContainer);
         editProfile = findViewById(R.id.editProfile);
@@ -149,30 +183,46 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
         msglayout=findViewById(R.id.msglay);
         selfrdit=findViewById(R.id.selfedit);
 
+        creditsTextView = findViewById(R.id.credits);
+
+        meesagePro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent chatIntent = new Intent(getApplicationContext(), ChatActivity.class);
+                chatIntent.putExtra("ChatType","NormalChat");
+                chatIntent.putExtra("ChatUser",userID);
+                chatIntent.putExtra("UserName",nameEditText.getText().toString());
+                startActivity(chatIntent);
+            }
+        });
+
+        setPostCounter();
+
        // Toast.makeText(getApplicationContext(),String.valueOf(currentUserId)+" "+String.valueOf(userID),Toast.LENGTH_SHORT).show();
-if (!String.valueOf(currentUserId).equals("null") || String.valueOf(currentUserId) != null) {
-    if (String.valueOf(currentUserId).equals(userID)) {
-        msglayout.setVisibility(View.GONE);
-        selfrdit.setVisibility(View.VISIBLE);
 
-    } else {
-        msglayout.setVisibility(View.VISIBLE);
-        selfrdit.setVisibility(View.GONE);
-    }
-}
+        if (!String.valueOf(currentUserId).equals("null") || String.valueOf(currentUserId) != null) {
+            if (String.valueOf(currentUserId).equals(userID)) {
+                msglayout.setVisibility(View.GONE);
+                selfrdit.setVisibility(View.VISIBLE);
 
-selfrdit.setOnClickListener(new View.OnClickListener() {
-    @Override
-    public void onClick(View v) {
-        presenter.onEditProfileClick();
-    }
-});
+            } else {
+                msglayout.setVisibility(View.VISIBLE);
+                selfrdit.setVisibility(View.GONE);
+            }
+        }
+
+        selfrdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.onEditProfileClick();
+            }
+        });
 
         initListeners();
 
         presenter.checkFollowState(userID);
 
-        loadPostsList();
+        //loadPostsList();
         supportPostponeEnterTransition();
 
 
@@ -184,6 +234,9 @@ selfrdit.setOnClickListener(new View.OnClickListener() {
         presenter.loadProfile(this, userID);
         presenter.getFollowersCount(userID);
         presenter.getFollowingsCount(userID);
+
+        showPostCounter(true);
+        showLikeCounter(true);
 
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
@@ -232,6 +285,129 @@ selfrdit.setOnClickListener(new View.OnClickListener() {
                     break;
             }
         }
+    }
+
+    private void setPostCounter(){
+
+        DatabaseHelper databaseHelper = ApplicationHelper.getDatabaseHelper();
+
+        DatabaseReference databaseReference = databaseHelper.getDatabaseReference().child(DatabaseHelper.POSTS_DB_KEY);
+        Query postsQuery;
+        postsQuery = databaseReference.orderByChild("authorId").equalTo(userID);
+
+        postsQuery.keepSynced(true);
+        postsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                int postsCount = (int) dataSnapshot.getChildrenCount();
+
+                String postsLabel = "posts";
+
+                postsCounterTextView.setText(buildCounterSpannable(postsLabel, postsCount));
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    public Spannable buildCounterSpannable(String label, int value) {
+        SpannableStringBuilder contentString = new SpannableStringBuilder();
+        contentString.append(String.valueOf(value));
+        contentString.append("\n");
+        int start = contentString.length();
+        contentString.append(label);
+        contentString.setSpan(new TextAppearanceSpan(getApplicationContext(), R.style.TextAppearance_Second_Light), start, contentString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return contentString;
+    }
+
+    // Add Fragments to Tabs
+    private void setupViewPager(ViewPager viewPager) {
+
+        PostsByUserFragment postsFragment = new PostsByUserFragment();
+
+        ProjectsByUserFragment projectsFragment = new ProjectsByUserFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putString("userid", userID);
+
+        postsFragment.setArguments(bundle);
+        projectsFragment.setArguments(bundle);
+
+        Adapter adapter = new Adapter(getSupportFragmentManager());
+        adapter.addFragment(postsFragment, "Posts");
+        adapter.addFragment(projectsFragment, "Projects");
+        viewPager.setAdapter(adapter);
+
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabs));
+
+        tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+
+                //Log.i("pos","" + tab.getPosition());
+
+                /*if (tab.getPosition() == 0){
+
+                    POST_TYPE = "post";
+
+                }
+                else if (tab.getPosition() == 1){
+
+                    POST_TYPE = "project";
+
+                }*/
+
+                viewPager.setCurrentItem(tab.getPosition());
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
+    }
+
+    static class Adapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
+        public Adapter(FragmentManager manager) {
+            super(manager);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragmentList.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragmentList.size();
+        }
+
+        public void addFragment(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitleList.get(position);
+        }
+
     }
 
     private void initListeners() {
@@ -305,11 +481,13 @@ selfrdit.setOnClickListener(new View.OnClickListener() {
 
             if (imageView.getVisibility() != View.GONE) {
 
-                ActivityOptions options = ActivityOptions.
+                /*ActivityOptions options = ActivityOptions.
                         makeSceneTransitionAnimation(ProfileActivity.this,
                                 new android.util.Pair<>(imageView, getString(R.string.post_image_transition_name))
                         );
-                startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST, options.toBundle());
+                startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST, options.toBundle());*/
+
+                startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST);
 
             } else {
 
@@ -360,20 +538,16 @@ selfrdit.setOnClickListener(new View.OnClickListener() {
     @Override
     public void setProfileName(String username) {
         nameEditText.setText(username);
-        meesagePro.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent chatIntent = new Intent(getApplicationContext(), ChatActivity.class);
-                chatIntent.putExtra("ChatUser",userID);
-                chatIntent.putExtra("UserName",username);
-                startActivity(chatIntent);
-            }
-        });
     }
 
     @Override
     public void setBio(String bio) {
         bioTextView.setText(bio);
+    }
+
+    @Override
+    public void setCredits(long credits) {
+        bioTextView.setText("Reward Points : " + credits);
     }
 
     @Override
@@ -431,9 +605,9 @@ selfrdit.setOnClickListener(new View.OnClickListener() {
     @Override
     public void hideLoadingPostsProgress() {
         //swipeContainer.setRefreshing(false);
-        if (postsProgressBar.getVisibility() != View.GONE) {
+        /*if (postsProgressBar.getVisibility() != View.GONE) {
             postsProgressBar.setVisibility(View.GONE);
-        }
+        }*/
     }
 
     @Override

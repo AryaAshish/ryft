@@ -37,6 +37,7 @@ public class Profile implements Serializable, LazyLoading,Comparable<Profile> {
     private String useruri;
     private String phoneNumber;
     private String status;
+    private long credits = 0;
     long timestamp;
     public long getTimestamp() {
         return timestamp;
@@ -45,10 +46,6 @@ public class Profile implements Serializable, LazyLoading,Comparable<Profile> {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
-
-
-
-
 
     public String getSkill() {
         return skill;
@@ -159,5 +156,13 @@ public class Profile implements Serializable, LazyLoading,Comparable<Profile> {
     @Override
     public int compareTo(Profile o) {
         return this.timestamp < o.timestamp ? -1 : this.timestamp > o.timestamp ? 1 :0;
+    }
+
+    public long getCredits() {
+        return credits;
+    }
+
+    public void setCredits(long credits) {
+        this.credits = credits;
     }
 }

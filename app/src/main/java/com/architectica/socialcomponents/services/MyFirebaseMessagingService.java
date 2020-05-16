@@ -31,6 +31,7 @@ import androidx.annotation.StringRes;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import com.architectica.socialcomponents.main.postDetails.ProjectDetailsActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -63,9 +64,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TITLE_KEY = "title";
     private static final String BODY_KEY = "body";
     private static final String ICON_KEY = "icon";
-    private static final String ACTION_TYPE_NEW_LIKE = "new_like";
-    private static final String ACTION_TYPE_NEW_COMMENT = "new_comment";
+    private static final String ACTION_TYPE_NEW_POST_LIKE = "new_post_like";
+    private static final String ACTION_TYPE_NEW_PROJECT_LIKE = "new_project_like";
+    private static final String ACTION_TYPE_NEW_POST_COMMENT = "new_post_comment";
+    private static final String ACTION_TYPE_NEW_PROJECT_COMMENT = "new_project_comment";
     private static final String ACTION_TYPE_NEW_POST = "new_post";
+    private static final String ACTION_TYPE_NEW_MESSAGE = "new_message";
+    private static final String ACTION_TYPE_NEW_GROUP_MESSAGE = "new_group_message";
+    private static final String ACTION_TYPE_NEW_PROJECT_APPLICATION = "new_response";
+    private static final String ACTION_TYPE_NEW_CANDIDATE_SELECTION = "new_selection";
     private static final String ACTION_TYPE_NEW_ADMIN_NOTIFICATION = "new_admin_notification";
 
     @Override
@@ -83,11 +90,17 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         LogUtil.logDebug(TAG, "Message Notification Action Type: " + receivedActionType);
 
         switch (receivedActionType) {
-            case ACTION_TYPE_NEW_LIKE:
-                parseCommentOrLike(Channel.NEW_LIKE, remoteMessage);
+            case ACTION_TYPE_NEW_POST_LIKE:
+                parsePostCommentOrLike(Channel.NEW_LIKE, remoteMessage);
                 break;
-            case ACTION_TYPE_NEW_COMMENT:
-                parseCommentOrLike(Channel.NEW_COMMENT, remoteMessage);
+            case ACTION_TYPE_NEW_POST_COMMENT:
+                parsePostCommentOrLike(Channel.NEW_COMMENT, remoteMessage);
+                break;
+            case ACTION_TYPE_NEW_PROJECT_LIKE:
+                parseProjectCommentOrLike(Channel.NEW_LIKE, remoteMessage);
+                break;
+            case ACTION_TYPE_NEW_PROJECT_COMMENT:
+                parseProjectCommentOrLike(Channel.NEW_COMMENT, remoteMessage);
                 break;
             case ACTION_TYPE_NEW_POST:
                 handleNewPostCreatedAction(remoteMessage);
@@ -95,6 +108,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             case ACTION_TYPE_NEW_ADMIN_NOTIFICATION:
                 adminNotification(remoteMessage);
                 break;
+            case ACTION_TYPE_NEW_MESSAGE:
+                parseNewMessage(Channel.NEW_LIKE, remoteMessage);
+                break;
+            case ACTION_TYPE_NEW_GROUP_MESSAGE:
+                parseNewMessage(Channel.NEW_LIKE, remoteMessage);
+                break;
+            case ACTION_TYPE_NEW_PROJECT_APPLICATION:
+                parseProjectCommentOrLike(Channel.NEW_LIKE, remoteMessage);
+                break;
+            case ACTION_TYPE_NEW_CANDIDATE_SELECTION:
+                parseProjectCommentOrLike(Channel.NEW_LIKE, remoteMessage);
+                break;
+
         }
     }
 
@@ -144,19 +170,56 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void parseCommentOrLike(Channel channel, RemoteMessage remoteMessage) {
+    private void parseNewMessage(Channel channel, RemoteMessage remoteMessage) {
         String notificationTitle = remoteMessage.getData().get(TITLE_KEY);
         String notificationBody = remoteMessage.getData().get(BODY_KEY);
-        String notificationImageUrl = remoteMessage.getData().get(ICON_KEY);
+        //String notificationImageUrl = remoteMessage.getData().get(ICON_KEY);
+        //String postId = remoteMessage.getData().get(POST_ID_KEY);
+
+        Intent backIntent = new Intent(this, MainActivity.class);
+        //Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
+        //intent.putExtra(ProjectDetailsActivity.PROJECT_ID_EXTRA_KEY, postId);
+
+        //Bitmap bitmap = getBitmapFromUrl(notificationImageUrl);
+
+        sendNotification(channel, notificationTitle, notificationBody, intent, backIntent);
+        LogUtil.logDebug(TAG, "Message Notification Body: " + remoteMessage.getData().get(BODY_KEY));
+    }
+
+
+    private void parseProjectCommentOrLike(Channel channel, RemoteMessage remoteMessage) {
+        String notificationTitle = remoteMessage.getData().get(TITLE_KEY);
+        String notificationBody = remoteMessage.getData().get(BODY_KEY);
+        //String notificationImageUrl = remoteMessage.getData().get(ICON_KEY);
         String postId = remoteMessage.getData().get(POST_ID_KEY);
 
         Intent backIntent = new Intent(this, MainActivity.class);
+        //Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, ProjectDetailsActivity.class);
+        intent.putExtra(ProjectDetailsActivity.PROJECT_ID_EXTRA_KEY, postId);
+
+        //Bitmap bitmap = getBitmapFromUrl(notificationImageUrl);
+
+        sendNotification(channel, notificationTitle, notificationBody, intent, backIntent);
+        LogUtil.logDebug(TAG, "Message Notification Body: " + remoteMessage.getData().get(BODY_KEY));
+    }
+
+
+    private void parsePostCommentOrLike(Channel channel, RemoteMessage remoteMessage) {
+        String notificationTitle = remoteMessage.getData().get(TITLE_KEY);
+        String notificationBody = remoteMessage.getData().get(BODY_KEY);
+        //String notificationImageUrl = remoteMessage.getData().get(ICON_KEY);
+        String postId = remoteMessage.getData().get(POST_ID_KEY);
+
+        Intent backIntent = new Intent(this, MainActivity.class);
+        //Intent intent = new Intent(this, MainActivity.class);
         Intent intent = new Intent(this, PostDetailsActivity.class);
         intent.putExtra(PostDetailsActivity.POST_ID_EXTRA_KEY, postId);
 
-        Bitmap bitmap = getBitmapFromUrl(notificationImageUrl);
+        //Bitmap bitmap = getBitmapFromUrl(notificationImageUrl);
 
-        sendNotification(channel, notificationTitle, notificationBody, bitmap, intent, backIntent);
+        sendNotification(channel, notificationTitle, notificationBody, intent, backIntent);
         LogUtil.logDebug(TAG, "Message Notification Body: " + remoteMessage.getData().get(BODY_KEY));
     }
 
@@ -168,6 +231,45 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void sendNotification(Channel channel, String notificationTitle, String notificationBody, Bitmap bitmap, Intent intent) {
         sendNotification(channel, notificationTitle, notificationBody, bitmap, intent, null);
     }
+
+    private void sendNotification(Channel channel, String notificationTitle, String notificationBody, Intent intent, Intent backIntent) {
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        PendingIntent pendingIntent;
+
+        if (backIntent != null) {
+            backIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent[] intents = new Intent[]{backIntent, intent};
+            pendingIntent = PendingIntent.getActivities(this, notificationId++, intents, PendingIntent.FLAG_ONE_SHOT);
+        } else {
+            pendingIntent = PendingIntent.getActivity(this, notificationId++, intent, PendingIntent.FLAG_ONE_SHOT);
+        }
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channel.id);
+        notificationBuilder.setAutoCancel(true)   //Automatically delete the notification
+                .setSmallIcon(R.drawable.ic_push_notification_small) //Notification icon
+                .setContentIntent(pendingIntent)
+                .setContentTitle(notificationTitle)
+                .setContentText(notificationBody)
+                .setSound(defaultSoundUri);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel notificationChannel = new NotificationChannel(channel.id, getString(channel.name), importance);
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(ContextCompat.getColor(this, R.color.primary));
+            notificationChannel.enableVibration(true);
+            notificationBuilder.setChannelId(channel.id);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
+        notificationManager.notify(notificationId++, notificationBuilder.build());
+    }
+
 
     private void sendNotification(Channel channel, String notificationTitle, String notificationBody, Bitmap bitmap, Intent intent, Intent backIntent) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -211,6 +313,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     enum Channel {
         NEW_LIKE("new_like_id", R.string.new_like_channel_name),
         NEW_COMMENT("new_comment_id", R.string.new_comment_channel_name);
+        //NEW_MESSAGE("new_message_id", R.string.new_message_channel_name);
 
         String id;
         @StringRes

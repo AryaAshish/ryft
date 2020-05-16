@@ -17,6 +17,8 @@
 package com.architectica.socialcomponents.adapters;
 
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -99,6 +101,9 @@ public class PostsByUserAdapter extends BasePostsAdapter {
         OnDataChangedListener<Post> onPostsDataChangedListener = new OnDataChangedListener<Post>() {
             @Override
             public void onListChanged(List<Post> list) {
+
+                //Log.i("posts list",list.toString());
+
                 setList(list);
                 callBack.onPostsListChanged(list.size());
             }

@@ -15,13 +15,37 @@
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat.Light">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary"
-            android:elevation="4dp"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_scrollFlags="scroll|enterAlways"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/primary"
+                android:elevation="4dp"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/profile_info"
+                layout="@layout/profile_info"/>
+
+        </LinearLayout>
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/result_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabGravity="fill"
+            app:tabMode="fixed">
+
+        </com.google.android.material.tabs.TabLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -29,43 +53,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:layout_marginTop="?attr/actionBarSize">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_below="@+id/result_tabs"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content">
 
-            android:orientation="vertical">
-
-            <include
-                layout="@layout/profile_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:descendantFocusability="blocksDescendants">
-
-                    <ProgressBar
-                        android:id="@+id/postsProgressBar"
-                        android:layout_width="@dimen/progress_bar_size"
-                        android:layout_height="@dimen/progress_bar_size"
-                        android:layout_gravity="top|center_horizontal"
-                        android:layout_marginTop="@dimen/profile_screen_margin_top_progress_bar" />
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recycler_view"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false"
-                        android:layout_margin="12dp"
-                        android:paddingBottom="@dimen/intrinsic_padding" />
-
-                </FrameLayout>
-
-        </LinearLayout>
-
+        </androidx.viewpager.widget.ViewPager>
 
     </androidx.core.widget.NestedScrollView>
 

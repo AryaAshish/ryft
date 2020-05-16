@@ -9,6 +9,7 @@ import android.view.View;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.enums.PostStatus;
 import com.architectica.socialcomponents.main.base.BasePresenter;
+import com.architectica.socialcomponents.main.interactors.PostInteractor;
 import com.architectica.socialcomponents.main.postDetails.PostDetailsActivity;
 import com.architectica.socialcomponents.managers.PostManager;
 import com.architectica.socialcomponents.model.Post;
@@ -21,47 +22,37 @@ import com.google.firebase.database.ValueEventListener;
 public class HomePresenter extends BasePresenter<HomeView> {
 
     private PostManager postManager;
+    private PostInteractor postInteractor;
 
     public HomePresenter(Context context) {
         super(context);
         postManager = PostManager.getInstance(context);
+        postInteractor = PostInteractor.getInstance(context);
     }
 
-    void onChatClicked(){
+    void onNotificationsClicked(){
 
         if (checkAuthorization()){
 
-            String authId = FirebaseAuth.getInstance().getUid();
+            ifViewAttached(view -> {
 
-            FirebaseDatabase.getInstance().getReference("profiles/" + authId + "/username").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                view.openNotificationsActivity();
 
-                    ifViewAttached(view -> {
-
-                        String username = dataSnapshot.getValue(String.class);
-                        view.openChatsList();
-                        /*if ("RiftAdmin".equals(username)){
-
-                            view.openChatsList();
-
-                        }
-                        else {
-
-                            view.openChatActivity();
-
-                        }*/
-
-                    });
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
             });
 
+        }
+
+    }
+
+    void onProfileClicked(){
+
+        if (checkAuthorization()){
+
+            ifViewAttached(view -> {
+
+                view.openUserProfileActivity();
+
+            });
 
         }
 
@@ -77,7 +68,7 @@ public class HomePresenter extends BasePresenter<HomeView> {
     }
 
     void onPostClicked(final Post post, final View postView) {
-        postManager.isPostExistSingleValue(post.getId(), exist -> ifViewAttached(view -> {
+        postInteractor.isPostExistSingleValue(post.getId(), exist -> ifViewAttached(view -> {
             if (exist) {
                 view.openPostDetailsActivity(post, postView);
             } else {

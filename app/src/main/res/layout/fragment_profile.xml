@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_content"
@@ -8,48 +8,52 @@
     android:background="@android:color/white"
     tools:context=".main.profile.ProfileActivity">
 
-    <androidx.core.widget.NestedScrollView
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            app:layout_scrollFlags="scroll|enterAlways"
             android:orientation="vertical">
 
             <include
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:id="@+id/profile_info"
                 layout="@layout/profile_info"/>
-
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <ProgressBar
-                    android:id="@+id/postsProgressBar"
-                    android:layout_width="@dimen/progress_bar_size"
-                    android:layout_height="@dimen/progress_bar_size"
-                    android:layout_gravity="top|center_horizontal"
-                    android:layout_marginTop="@dimen/profile_screen_margin_top_progress_bar" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:nestedScrollingEnabled="false"
-                    android:paddingBottom="@dimen/intrinsic_padding" />
-
-            </FrameLayout>
-
-
 
         </LinearLayout>
 
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/result_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabGravity="fill"
+            app:tabMode="fixed">
+
+        </com.google.android.material.tabs.TabLayout>
+
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewpager"
+            android:layout_below="@+id/result_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </androidx.viewpager.widget.ViewPager>
 
     </androidx.core.widget.NestedScrollView>
 
-
-</RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

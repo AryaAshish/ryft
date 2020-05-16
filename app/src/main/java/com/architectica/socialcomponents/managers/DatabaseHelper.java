@@ -46,9 +46,14 @@ public class DatabaseHelper {
     private static DatabaseHelper instance;
 
     public static final String POSTS_DB_KEY = "posts";
+    public static final String HASHTAGS_DB_KEY = "hashtags";
+    public static final String REWARDS_DB_KEY = "rewards";
+    public static final String PROJECTS_DB_KEY = "projects";
     public static final String PROFILES_DB_KEY = "profiles";
     public static final String POST_COMMENTS_DB_KEY = "post-comments";
+    public static final String PROJECT_COMMENTS_DB_KEY = "project-comments";
     public static final String POST_LIKES_DB_KEY = "post-likes";
+    public static final String PROJECT_LIKES_DB_KEY = "project-likes";
     public static final String FOLLOW_DB_KEY = "follow";
     public static final String FOLLOWINGS_DB_KEY = "followings";
     public static final String FOLLOWINGS_POSTS_DB_KEY = "followingPostsIds";
@@ -132,12 +137,29 @@ public class DatabaseHelper {
         return getStorageReference().child(IMAGES_STORAGE_KEY).child(IMAGES_SMALL_KEY).child(imageTitle);
     }
 
-    public UploadTask uploadImage(Uri uri, String imageTitle) {
+    public UploadTask uploadImage(Uri uri, String imageTitle, String contentType) {
         StorageReference riversRef = getStorageReference().child(IMAGES_STORAGE_KEY + "/" + imageTitle);
         // Create file metadata including the content type
-        StorageMetadata metadata = new StorageMetadata.Builder()
-                .setCacheControl("max-age=7776000, Expires=7776000, public, must-revalidate")
-                .build();
+
+        StorageMetadata metadata;
+
+        if(contentType != null){
+
+            metadata = new StorageMetadata.Builder()
+                    .setContentType(contentType)
+                    .setCacheControl("max-age=7776000, Expires=7776000, public, must-revalidate")
+                    .build();
+
+        }
+        else {
+
+            metadata = new StorageMetadata.Builder()
+                    .setCacheControl("max-age=7776000, Expires=7776000, public, must-revalidate")
+                    .build();
+
+        }
+
+
 
         return riversRef.putFile(uri, metadata);
     }

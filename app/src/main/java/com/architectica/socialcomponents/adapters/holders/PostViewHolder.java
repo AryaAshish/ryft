@@ -17,16 +17,42 @@
 
 package com.architectica.socialcomponents.adapters.holders;
 
+import android.app.Activity;
 import android.content.Context;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
+import androidx.recyclerview.widget.RecyclerView;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+
+import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.LinearLayout;
 
+import com.architectica.socialcomponents.main.Hashtags.HashtagPostsActivity;
+import com.architectica.socialcomponents.managers.DatabaseHelper;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.architectica.socialcomponents.Constants;
@@ -44,6 +70,11 @@ import com.architectica.socialcomponents.model.Profile;
 import com.architectica.socialcomponents.utils.FormatterUtil;
 import com.architectica.socialcomponents.utils.GlideApp;
 import com.architectica.socialcomponents.utils.ImageUtil;
+import com.google.firebase.storage.StorageReference;
+import com.hendraanggrian.appcompat.widget.SocialTextView;
+import com.hendraanggrian.appcompat.widget.SocialView;
+
+import java.io.IOException;
 
 /**
  * Created by alexey on 27.12.16.
@@ -52,10 +83,13 @@ import com.architectica.socialcomponents.utils.ImageUtil;
 public class PostViewHolder extends RecyclerView.ViewHolder {
     public static final String TAG = PostViewHolder.class.getSimpleName();
 
+    private LinearLayout countersLayout;
     protected Context context;
     private ImageView postImageView;
+    private SimpleExoPlayer exoPlayer;
+    private PlayerView postVideoView;
     private TextView titleTextView;
-    private TextView detailsTextView;
+    private SocialTextView detailsTextView;
     private TextView likeCounterTextView,userName,userSkill;
     private ImageView likesImageView;
     private TextView commentsCountTextView;
@@ -80,6 +114,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         this.baseActivity = activity;
 
         postImageView = view.findViewById(R.id.postImageView);
+        postVideoView = view.findViewById(R.id.postVideoView);
         userName=view.findViewById(R.id.user);
         userSkill=view.findViewById(R.id.userInfo);
         likeCounterTextView = view.findViewById(R.id.likeCounterTextView);
@@ -89,6 +124,27 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         dateTextView = view.findViewById(R.id.dateTextView);
         titleTextView = view.findViewById(R.id.titleTextView);
         detailsTextView = view.findViewById(R.id.detailsTextView);
+        countersLayout = view.findViewById(R.id.countersContainer);
+
+        countersLayout.setVisibility(View.VISIBLE);
+
+        detailsTextView.setHashtagColor(Color.RED);
+        detailsTextView.setOnHashtagClickListener(new SocialView.OnClickListener() {
+            @Override
+            public void onClick(SocialView view, CharSequence text) {
+
+                //Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+
+                Log.i("text","" + text);
+
+                Intent intent = new Intent(context, HashtagPostsActivity.class);
+                intent.putExtra("hashtag","" + text);
+                context.startActivity(intent);
+                ((Activity) context).finish();
+
+            }
+        });
+
         authorImageView = view.findViewById(R.id.authorImageView);
         likeViewGroup = view.findViewById(R.id.likesContainer);
 
@@ -125,10 +181,40 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
 
         if (post.getImageTitle().equals("")){
             postImageView.setVisibility(View.GONE);
+            postVideoView.setVisibility(View.GONE);
         }
         else {
-            postImageView.setVisibility(View.VISIBLE);
-            postManager.loadImageMediumSize(GlideApp.with(baseActivity), post.getImageTitle(), postImageView);
+
+            if(post.getContentType() != null){
+
+                if (post.getContentType().contains("video")){
+
+                    postImageView.setVisibility(View.GONE);
+
+                    postVideoView.setVisibility(View.VISIBLE);
+
+                    loadVideo(post.getImageTitle());
+
+                }
+                else{
+
+                    postVideoView.setVisibility(View.GONE);
+
+                    postImageView.setVisibility(View.VISIBLE);
+                    postManager.loadImageMediumSize(GlideApp.with(baseActivity), post.getImageTitle(), postImageView);
+
+                }
+
+            }
+            else {
+
+                postVideoView.setVisibility(View.GONE);
+
+                postImageView.setVisibility(View.VISIBLE);
+                postManager.loadImageMediumSize(GlideApp.with(baseActivity), post.getImageTitle(), postImageView);
+
+            }
+
         }
 
         likeController = new LikeController(context, post, likeCounterTextView, likesImageView, true);
@@ -154,6 +240,72 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         if (firebaseUser != null) {
             postManager.hasCurrentUserLikeSingleValue(post.getId(), firebaseUser.getUid(), createOnLikeObjectExistListener());
         }
+    }
+
+    private void loadVideo(String imageTitle){
+
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance(context);
+
+        StorageReference reference = databaseHelper.getOriginImageStorageRef(imageTitle);
+
+        reference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+
+                //setThumbnail(postImageView,uri.toString());
+
+                //postVideoView.setVideoURI(uri);
+
+                try{
+
+                    BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter.Builder(context).build();
+                    TrackSelector trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(bandwidthMeter));
+                    exoPlayer = ExoPlayerFactory.newSimpleInstance(context);
+                    DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory("posts");
+                    ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+
+                    MediaSource mediaSource = new ExtractorMediaSource(uri,dataSourceFactory,extractorsFactory,null,null);
+
+                    postVideoView.setPlayer(exoPlayer);
+                    exoPlayer.prepare(mediaSource);
+                    exoPlayer.setPlayWhenReady(false);
+
+                }
+                catch (Exception e){
+
+                    Toast.makeText(context, "exo player exception", Toast.LENGTH_SHORT).show();
+
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(context, "Video loading failed", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    private void setThumbnail(final ImageView imageView, String thumbnailUrl) {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(thumbnailUrl).build();
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+                Log.d(TAG, "Thumbnail: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(okhttp3.Call call, okhttp3.Response response) {
+                try {
+                    imageView.setImageBitmap(BitmapFactory.decodeStream(response.body().byteStream()));
+                } catch (Exception e) {
+                    Log.d(TAG, "Thumbnail onResponse: " + e.getMessage());
+                    // pass
+                }
+            }
+        });
     }
 
     private String removeNewLinesDividers(String text) {

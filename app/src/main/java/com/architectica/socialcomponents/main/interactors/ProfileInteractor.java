@@ -20,7 +20,10 @@ package com.architectica.socialcomponents.main.interactors;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
+import com.architectica.socialcomponents.model.Project;
+import com.architectica.socialcomponents.utils.ValidationUtil;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -75,6 +78,9 @@ public class ProfileInteractor {
     }
 
     public void createOrUpdateProfile(final Profile profile, final OnProfileCreatedListener onProfileCreatedListener) {
+
+        //Log.i("id","" + profile.getId());
+
         Task<Void> task = databaseHelper
                 .getDatabaseReference()
                 .child(DatabaseHelper.PROFILES_DB_KEY)
@@ -82,6 +88,8 @@ public class ProfileInteractor {
                 .setValue(profile);
         task.addOnCompleteListener(task1 -> {
             onProfileCreatedListener.onProfileCreated(task1.isSuccessful());
+            //Log.i("task","" + task1.isSuccessful());
+            //Log.i("token","" + FirebaseInstanceId.getInstance().getToken());
             addRegistrationToken(FirebaseInstanceId.getInstance().getToken(), profile.getId());
             LogUtil.logDebug(TAG, "createOrUpdateProfile, success: " + task1.isSuccessful());
         });
@@ -89,7 +97,11 @@ public class ProfileInteractor {
 
     public void createOrUpdateProfileWithImage(final Profile profile, Uri imageUri, final OnProfileCreatedListener onProfileCreatedListener) {
         String imageTitle = ImageUtil.generateImageTitle(UploadImagePrefix.PROFILE, profile.getId());
-        UploadTask uploadTask = databaseHelper.uploadImage(imageUri, imageTitle);
+
+        String contentType = ValidationUtil.getMimeType(imageUri,context);
+        //String contentType = "image";
+
+        UploadTask uploadTask = databaseHelper.uploadImage(imageUri, imageTitle, contentType);
 
         if (uploadTask != null) {
             uploadTask.addOnCompleteListener(task -> {
@@ -138,6 +150,13 @@ public class ProfileInteractor {
         ValueEventListener valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if(!dataSnapshot.hasChild("credits")){
+
+                    dataSnapshot.getRef().child("credits").setValue(0);
+
+                }
+
                 Profile profile = dataSnapshot.getValue(Profile.class);
                 listener.onObjectChanged(profile);
             }
@@ -157,6 +176,13 @@ public class ProfileInteractor {
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if(!dataSnapshot.hasChild("credits")){
+
+                    dataSnapshot.getRef().child("credits").setValue(0);
+
+                }
+
                 Profile profile = dataSnapshot.getValue(Profile.class);
                 listener.onObjectChanged(profile);
             }
@@ -170,6 +196,60 @@ public class ProfileInteractor {
     }
 
     public void updateProfileLikeCountAfterRemovingPost(Post post) {
+        DatabaseReference profileRef = databaseHelper
+                .getDatabaseReference()
+                .child(DatabaseHelper.PROFILES_DB_KEY + "/" + post.getAuthorId() + "/likesCount");
+        final long likesByPostCount = post.getLikesCount();
+
+        profileRef.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                Integer currentValue = mutableData.getValue(Integer.class);
+                if (currentValue != null && currentValue >= likesByPostCount) {
+                    mutableData.setValue(currentValue - likesByPostCount);
+                }
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                LogUtil.logInfo(TAG, "Updating likes count transaction is completed.");
+            }
+        });
+
+    }
+
+    public void addCredits(long credits){
+
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid().toString();
+
+        DatabaseReference profileRef = databaseHelper
+                .getDatabaseReference()
+                .child(DatabaseHelper.PROFILES_DB_KEY + "/" + uid + "/credits");
+
+        profileRef.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                Integer currentValue = mutableData.getValue(Integer.class);
+                if (currentValue == null) {
+                    mutableData.setValue(credits);
+                } else {
+                    mutableData.setValue(currentValue + credits);
+                }
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                LogUtil.logInfo(TAG, "Updating credits count transaction is completed.");
+            }
+        });
+
+    }
+
+    public void updateProfileLikeCountAfterRemovingProject(Project post) {
         DatabaseReference profileRef = databaseHelper
                 .getDatabaseReference()
                 .child(DatabaseHelper.PROFILES_DB_KEY + "/" + post.getAuthorId() + "/likesCount");
@@ -231,7 +311,42 @@ public class ProfileInteractor {
 
     public ValueEventListener searchProfiles(String searchText, OnDataChangedListener<Profile> onDataChangedListener) {
         DatabaseReference reference = databaseHelper.getDatabaseReference().child(DatabaseHelper.PROFILES_DB_KEY);
-        ValueEventListener valueEventListener = getSearchQuery(reference, "username", searchText).addValueEventListener(new ValueEventListener() {
+
+        ValueEventListener valueEventListener = reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                List<Profile> list = new ArrayList<>();
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                    if (snapshot.hasChild("username")){
+
+                        String usernamesmall = snapshot.child("username").getValue(String.class).toLowerCase();
+
+                        String searchsmall = searchText.toLowerCase();
+
+                        if (usernamesmall.contains(searchsmall)){
+
+                            Profile profile = snapshot.getValue(Profile.class);
+                            list.add(profile);
+
+                        }
+
+                    }
+                }
+
+                onDataChangedListener.onListChanged(list);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        /*ValueEventListener valueEventListener = getSearchQuery(reference, "username", searchText).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<Profile> list = new ArrayList<>();
@@ -246,7 +361,7 @@ public class ProfileInteractor {
             public void onCancelled(DatabaseError databaseError) {
                 LogUtil.logError(TAG, "searchProfiles(), onCancelled", new Exception(databaseError.getMessage()));
             }
-        });
+        });*/
 
         databaseHelper.addActiveListener(valueEventListener, reference);
         return valueEventListener;
@@ -254,7 +369,43 @@ public class ProfileInteractor {
 
     public ValueEventListener searchProfilesBySkill(String searchText, OnDataChangedListener<Profile> onDataChangedListener) {
         DatabaseReference reference = databaseHelper.getDatabaseReference().child(DatabaseHelper.PROFILES_DB_KEY);
-        ValueEventListener valueEventListener = getSearchQuery(reference, "skill", searchText).addValueEventListener(new ValueEventListener() {
+
+        ValueEventListener valueEventListener = reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                List<Profile> list = new ArrayList<>();
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                    if (snapshot.hasChild("skill")){
+
+                        String skillsmall = snapshot.child("skill").getValue(String.class).toLowerCase();
+
+                        String searchsmall = searchText.toLowerCase();
+
+                        if (skillsmall.contains(searchsmall)){
+
+                            Profile profile = snapshot.getValue(Profile.class);
+                            list.add(profile);
+
+                        }
+
+                    }
+
+                }
+
+                onDataChangedListener.onListChanged(list);
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        /*ValueEventListener valueEventListener = getSearchQuery(reference, "skill", searchText).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<Profile> list = new ArrayList<>();
@@ -269,7 +420,7 @@ public class ProfileInteractor {
             public void onCancelled(DatabaseError databaseError) {
                 LogUtil.logError(TAG, "searchProfiles(), onCancelled", new Exception(databaseError.getMessage()));
             }
-        });
+        });*/
 
         databaseHelper.addActiveListener(valueEventListener, reference);
         return valueEventListener;

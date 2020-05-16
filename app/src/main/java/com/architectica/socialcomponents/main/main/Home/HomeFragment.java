@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+
+import com.architectica.socialcomponents.main.main.Notifications.NotificationsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -26,8 +28,6 @@ import android.widget.TextView;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.adapters.PostsAdapter;
 import com.architectica.socialcomponents.main.Chat.ChatActivity;
-import com.architectica.socialcomponents.main.ChatsList.ChatsListActivity;
-import com.architectica.socialcomponents.main.News.GoogleNewsActivity;
 import com.architectica.socialcomponents.main.base.BaseFragment;
 import com.architectica.socialcomponents.main.main.MainActivity;
 import com.architectica.socialcomponents.main.post.createPost.CreatePostActivity;
@@ -40,6 +40,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.architectica.socialcomponents.main.login.LoginActivity;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -71,18 +73,18 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
         // Handle item selection
         switch (item.getItemId()) {
 
-            case R.id.followingPosts:
-                Intent newsIntent = new Intent(getActivity(), GoogleNewsActivity.class);
-                startActivity(newsIntent);
+            case R.id.profile:
+                presenter.onProfileClicked();
                 return true;
 
-            case R.id.chatIcon:
-                presenter.onChatClicked();
+            case R.id.notifications:
+                presenter.onNotificationsClicked();
                 return true;
 
             case R.id.search:
                 Intent searchIntent = new Intent(getActivity(), SearchActivity.class);
                 startActivity(searchIntent);
+                //finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -90,42 +92,18 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
     }
 
     @Override
-    public void openChatActivity() {
+    public void openNotificationsActivity() {
 
-        FirebaseDatabase.getInstance().getReference("profiles").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                    if ("RiftAdmin".equals(snapshot.child("username").getValue(String.class))) {
-
-                        String mChatUser = snapshot.getKey();
-                        String userName = "RiftAdmin";
-
-                        Intent chatIntent = new Intent(getActivity(), ChatActivity.class);
-                        chatIntent.putExtra("ChatUser", mChatUser);
-                        chatIntent.putExtra("UserName", userName);
-                        startActivity(chatIntent);
-
-                    }
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        Intent intent = new Intent(getActivity(), NotificationsActivity.class);
+        startActivity(intent);
 
     }
 
     @Override
-    public void openChatsList() {
+    public void openUserProfileActivity() {
 
-        Intent chatIntent = new Intent(getActivity(), ChatsListActivity.class);
-        startActivity(chatIntent);
+        Intent intent = new Intent(getActivity(), com.architectica.socialcomponents.main.main.Profile.ProfileActivity.class);
+        startActivity(intent);
 
     }
 
@@ -158,6 +136,7 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
     @Override
     public void onResume() {
         super.onResume();
+        //POST_TYPE = "post";
         presenter.updateNewPostCounter();
     }
 
@@ -167,6 +146,8 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        //POST_TYPE = "post";
 
         initContentView(view);
 
@@ -243,7 +224,6 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
             @Override
             public void onItemClick(final Post post, final View view) {
                 presenter.onPostClicked(post, view);
-//                openPostDetailsActivity(post, view);
             }
 
             @Override
@@ -328,13 +308,15 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
 
             if (imageView.getVisibility() != View.GONE) {
 
-                ActivityOptions options = ActivityOptions.
+                /*ActivityOptions options = ActivityOptions.
                         makeSceneTransitionAnimation(getActivity(),
                                 new android.util.Pair<>(imageView, getString(R.string.post_image_transition_name)),
                                 new android.util.Pair<>(authorImageView, getString(R.string.post_author_image_transition_name))
-                        );
+                        );*/
 
-                startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST, options.toBundle());
+               // startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST, options.toBundle());
+
+                startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST);
 
             } else {
 
@@ -360,21 +342,17 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
     @SuppressLint("RestrictedApi")
     @Override
     public void openProfileActivity(String userId, View view) {
-        Intent intent = new Intent(getActivity(), ProfileActivity.class);
-        intent.putExtra(ProfileActivity.USER_ID_EXTRA_KEY, userId);
-        startActivityForResult(intent, ProfileActivity.CREATE_POST_FROM_PROFILE_REQUEST);
 
-//        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && view != null) {
-//
-//            View authorImageView = view.findViewById(R.id.authorImageView);
-//
-//            ActivityOptions options = ActivityOptions.
-//                    makeSceneTransitionAnimation(getActivity(),
-//                            new android.util.Pair<>(authorImageView, getString(R.string.post_author_image_transition_name)));
-//            startActivityForResult(intent, ProfileActivity.CREATE_POST_FROM_PROFILE_REQUEST, options.toBundle());
-//        } else {
-        //           startActivityForResult(intent, ProfileActivity.CREATE_POST_FROM_PROFILE_REQUEST);
-        //     }
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            Intent intent = new Intent(getActivity(), ProfileActivity.class);
+            intent.putExtra(ProfileActivity.USER_ID_EXTRA_KEY, userId);
+            startActivityForResult(intent, ProfileActivity.CREATE_POST_FROM_PROFILE_REQUEST);
+            //finish();
+        }else {
+            Intent intent=new Intent(getActivity(),LoginActivity.class);
+            startActivity(intent);
+        }
+
     }
 
 }

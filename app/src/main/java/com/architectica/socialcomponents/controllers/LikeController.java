@@ -92,6 +92,24 @@ public class LikeController {
         updateLocalPostLikeCounter(post);
     }
 
+    public void projectLikeClickAction(long prevValue) {
+        if (!updatingLikeCounter) {
+            startAnimateLikeButton(likeAnimationType);
+
+            if (!isLiked) {
+                addProjectLike(prevValue);
+            } else {
+                removeProjectLike(prevValue);
+            }
+        }
+    }
+
+    public void projectLikeClickActionLocal(Post post) {
+        setUpdatingLikeCounter(false);
+        projectLikeClickAction(post.getLikesCount());
+        updateLocalProjectLikeCounter(post);
+    }
+
     private void addLike(long prevValue) {
         updatingLikeCounter = true;
         isLiked = true;
@@ -104,6 +122,20 @@ public class LikeController {
         isLiked = false;
         likeCounterTextView.setText(String.valueOf(prevValue - 1));
         PostInteractor.getInstance(context).removeLike(postId, postAuthorId);
+    }
+
+    private void addProjectLike(long prevValue) {
+        updatingLikeCounter = true;
+        isLiked = true;
+        likeCounterTextView.setText(String.valueOf(prevValue + 1));
+        PostInteractor.getInstance(context).createOrUpdateProjectLike(postId, postAuthorId);
+    }
+
+    private void removeProjectLike(long prevValue) {
+        updatingLikeCounter = true;
+        isLiked = false;
+        likeCounterTextView.setText(String.valueOf(prevValue - 1));
+        PostInteractor.getInstance(context).removeProjectLike(postId, postAuthorId);
     }
 
     private void startAnimateLikeButton(AnimationType animationType) {
@@ -211,6 +243,14 @@ public class LikeController {
         }
     }
 
+    private void updateLocalProjectLikeCounter(Post post) {
+        if (isLiked) {
+            post.setLikesCount(post.getLikesCount() + 1);
+        } else {
+            post.setLikesCount(post.getLikesCount() - 1);
+        }
+    }
+
     public void handleLikeClickAction(final BaseActivity baseActivity, final Post post) {
         PostManager.getInstance(baseActivity.getApplicationContext()).isPostExistSingleValue(post.getId(), new OnObjectExistListener<Post>() {
             @Override
@@ -246,6 +286,41 @@ public class LikeController {
         });
     }
 
+    public void handleProjectLikeClickAction(final BaseActivity baseActivity, final Post post) {
+        PostInteractor.getInstance(baseActivity.getApplicationContext()).isProjectExistSingleValue(post.getId(), new OnObjectExistListener<Post>() {
+            @Override
+            public void onDataChanged(boolean exist) {
+                if (exist) {
+                    if (baseActivity.hasInternetConnection()) {
+                        doHandleProjectLikeClickAction(baseActivity, post);
+                    } else {
+                        showWarningMessage(baseActivity, R.string.internet_connection_failed);
+                    }
+                } else {
+                    showWarningMessage(baseActivity, R.string.message_post_was_removed);
+                }
+            }
+        });
+    }
+
+    public void handleProjectLikeClickAction(final BaseActivity baseActivity, final String postId) {
+        PostInteractor.getInstance(baseActivity.getApplicationContext()).getSingleProject(postId, new OnPostChangedListener() {
+            @Override
+            public void onObjectChanged(Post post) {
+                if (baseActivity.hasInternetConnection()) {
+                    doHandleProjectLikeClickAction(baseActivity, post);
+                } else {
+                    showWarningMessage(baseActivity, R.string.internet_connection_failed);
+                }
+            }
+
+            @Override
+            public void onError(String errorText) {
+                baseActivity.showSnackBar(errorText);
+            }
+        });
+    }
+
     private void showWarningMessage(BaseActivity baseActivity, int messageId) {
         if (baseActivity instanceof MainActivity) {
             ((MainActivity) baseActivity).showFloatButtonRelatedSnackBar(messageId);
@@ -260,6 +335,16 @@ public class LikeController {
                 likeClickActionLocal(post);
             } else {
                 likeClickAction(post.getLikesCount());
+            }
+        }
+    }
+
+    private void doHandleProjectLikeClickAction(BaseActivity baseActivity, Post post) {
+        if (baseActivity.checkAuthorization()) {
+            if (isListView) {
+                projectLikeClickActionLocal(post);
+            } else {
+                projectLikeClickAction(post.getLikesCount());
             }
         }
     }

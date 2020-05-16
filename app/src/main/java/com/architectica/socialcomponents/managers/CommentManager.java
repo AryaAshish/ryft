@@ -60,6 +60,11 @@ public class CommentManager extends FirebaseListenersManager {
         addListenerToMap(activityContext, valueEventListener);
     }
 
+    public void getProjectCommentsList(Context activityContext, String postId, OnDataChangedListener<Comment> onDataChangedListener) {
+        ValueEventListener valueEventListener = commentInteractor.getProjectCommentsList(postId, onDataChangedListener);
+        addListenerToMap(activityContext, valueEventListener);
+    }
+
     public void removeComment(String commentId, final String postId, final OnTaskCompleteListener onTaskCompleteListener) {
         commentInteractor.removeComment(commentId, postId, onTaskCompleteListener);
     }
