@@ -446,7 +446,7 @@ public class ProfileActivity extends BaseActivity<ProfileView,ProfilePresenter> 
 
     @Override
     public void setStatus(String status) {
-        if ("Not Hired".equals(status)){
+        /*if ("Not Hired".equals(status)){
 
             statusTextView.setText(status);
             statusTextView.setTextColor(getResources().getColor(R.color.red));
@@ -457,7 +457,8 @@ public class ProfileActivity extends BaseActivity<ProfileView,ProfilePresenter> 
             statusTextView.setText(status);
             statusTextView.setTextColor(getResources().getColor(R.color.green));
 
-        }
+        }*/
+        statusTextView.setVisibility(View.GONE);
     }
 
     @Override
