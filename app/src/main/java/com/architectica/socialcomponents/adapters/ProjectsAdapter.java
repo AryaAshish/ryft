@@ -188,30 +188,40 @@ public class ProjectsAdapter extends BaseProjectsAdapter {
             }
         };
 
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null){
 
-        FirebaseDatabase.getInstance().getReference("profiles/" + userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                if ("RiftAdmin".equals(dataSnapshot.child("username").getValue(String.class))){
+            FirebaseDatabase.getInstance().getReference("profiles/" + userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
 
-                    PostManager.getInstance(activity).getAllProjectsList(onPostsDataChangedListener, nextItemCreatedDate);
+                    if ("RiftAdmin".equals(dataSnapshot.child("username").getValue(String.class))){
+
+                        PostManager.getInstance(activity).getAllProjectsList(onPostsDataChangedListener, nextItemCreatedDate);
+
+                    }
+                    else {
+
+                        PostManager.getInstance(activity).getProjectsList(onPostsDataChangedListener, nextItemCreatedDate);
+
+                    }
 
                 }
-                else {
 
-                    PostManager.getInstance(activity).getProjectsList(onPostsDataChangedListener, nextItemCreatedDate);
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
                 }
+            });
 
-            }
+        }
+        else{
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+            PostManager.getInstance(activity).getProjectsList(onPostsDataChangedListener, nextItemCreatedDate);
 
-            }
-        });
+        }
+
     }
 
 

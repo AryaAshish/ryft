@@ -36,13 +36,18 @@ public class ProjectsPresenter extends BasePresenter<ProjectsView> {
 
     void onProjectClicked(final Post post, final View postView) {
 
-        postInteractor.isProjectExistSingleValue(post.getId(), exist -> ifViewAttached(view -> {
-            if (exist) {
-                view.openPostDetailsActivity(post, postView);
-            } else {
-                view.showFloatButtonRelatedSnackBar(R.string.error_post_was_removed);
-            }
-        }));
+        if (checkAuthorization()){
+
+            postInteractor.isProjectExistSingleValue(post.getId(), exist -> ifViewAttached(view -> {
+                if (exist) {
+                    view.openPostDetailsActivity(post, postView);
+                } else {
+                    view.showFloatButtonRelatedSnackBar(R.string.error_post_was_removed);
+                }
+            }));
+
+        }
+
     }
 
     void onPostCreated() {

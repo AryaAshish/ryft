@@ -248,11 +248,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
             case R.id.menu_projects:
 
-                if (checkAuthorization()) {
-
-                    frag = ProjectsFragment.newInstance();
-
-                }
+                frag = ProjectsFragment.newInstance();
 
                 break;
 

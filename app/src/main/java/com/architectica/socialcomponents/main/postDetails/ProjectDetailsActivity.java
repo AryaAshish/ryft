@@ -88,6 +88,7 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
     public static final String PROJECT_STATUS_EXTRA_KEY = "ProjectDetailsActivity.PROJECT_STATUS_EXTRA_KEY";
 
     private EditText commentEditText;
+    private EditText gitLink;
     @Nullable
     private ScrollView scrollView;
     private ViewGroup likesContainer;
@@ -167,6 +168,7 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
         dateTextView = findViewById(R.id.dateTextView);
         commentsProgressBar = findViewById(R.id.commentsProgressBar);
         warningCommentsTextView = findViewById(R.id.warningCommentsTextView);
+        gitLink = findViewById(R.id.gitLink);
 
         needMentorsIcon = findViewById(R.id.needMentorsIcon);
 
@@ -303,23 +305,22 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
                         if("verified".equals(verifyStatus)){
 
                             //show the people applied button
-
+                            gitLink.setVisibility(View.GONE);
                             applyNow.setText("PEOPLE APPLIED");
 
                         }
                         else{
 
                             //show the verify button
-
+                            gitLink.setVisibility(View.VISIBLE);
                             applyNow.setText("VERIFY");
 
                         }
 
                     }
                     else {
-
+                        gitLink.setVisibility(View.GONE);
                         applyNow.setText("PEOPLE APPLIED");
-
                     }
 
                 }
@@ -330,16 +331,15 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
                     DataSnapshot dataSnapshot1 = dataSnapshot2.child("responses");
 
                     if(dataSnapshot1.hasChild(userid)){
-
+                        gitLink.setVisibility(View.GONE);
                         applyNow.setText("APPLIED");
                         applyNow.setEnabled(false);
 
                     }
                     else{
-
+                        gitLink.setVisibility(View.GONE);
                         applyNow.setText("APPLY NOW");
                         applyNow.setEnabled(true);
-
                     }
 
                 }
@@ -385,11 +385,24 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
                 }
                 else if ("VERIFY".equals(text)){
 
-                    FirebaseDatabase.getInstance().getReference("projects/" + postId).child("status").setValue("verified");
+                    String link = gitLink.getText().toString();
 
-                    Toast.makeText(ProjectDetailsActivity.this, "project status changed to verified", Toast.LENGTH_SHORT).show();
+                    if (link.length() != 0){
 
-                    applyNow.setText("PEOPLE APPLIED");
+                        FirebaseDatabase.getInstance().getReference("projects/" + postId).child("githublink").setValue(link);
+
+                        FirebaseDatabase.getInstance().getReference("projects/" + postId).child("status").setValue("verified");
+
+                        Toast.makeText(ProjectDetailsActivity.this, "project status changed to verified", Toast.LENGTH_SHORT).show();
+
+                        applyNow.setText("PEOPLE APPLIED");
+
+                    }
+                    else {
+
+                        Toast.makeText(ProjectDetailsActivity.this, "Please provide the github link", Toast.LENGTH_SHORT).show();
+
+                    }
 
                 }
                 else{
@@ -433,6 +446,40 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
                     }
                 });*/
 
+            }
+        });
+
+        viewInGithub.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseDatabase.getInstance().getReference("projects/" + postId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                        if (dataSnapshot.hasChild("githublink")){
+
+                            String url = dataSnapshot.child("githublink").getValue(String.class);
+
+                            if (!url.startsWith("http://") && !url.startsWith("https://"))
+                                url = "http://" + url;
+
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                            startActivity(browserIntent);
+
+                        }
+                        else {
+
+                            Toast.makeText(ProjectDetailsActivity.this, "github link not provided for this project.", Toast.LENGTH_SHORT).show();
+
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
             }
         });
 

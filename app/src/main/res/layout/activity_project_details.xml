@@ -167,6 +167,14 @@
                 android:paddingRight="@dimen/large_intrinsic_padding"
                 android:textAppearance="@style/TextAppearance.Second" />
 
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:hint="github link"
+                android:id="@+id/gitLink"
+                android:visibility="gone"/>
+
             <LinearLayout
                 android:id="@+id/buttonsContainer"
                 android:layout_width="match_parent"
