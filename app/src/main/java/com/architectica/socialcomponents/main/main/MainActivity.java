@@ -85,6 +85,8 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        getCurrentVersion();
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Rift");
@@ -172,7 +174,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         protected JSONObject doInBackground(String... params) {
             try {
                 //It retrieves the latest version by scraping the content of current version from play store at runtime
-                Document doc = Jsoup.connect("appstoreurl").get();
+                Document doc = Jsoup.connect("https://play.google.com/store/apps/details?id=com.architectica.socialcomponents").get();
                 Log.i("doc",doc.toString());
                 latestVersion = doc.getElementsByClass("htlgb").get(6).text();
 
