@@ -400,7 +400,7 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
                     }
                     else {
 
-                        Toast.makeText(ProjectDetailsActivity.this, "Please provide the github link", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProjectDetailsActivity.this, "Please provide the test link", Toast.LENGTH_SHORT).show();
 
                     }
 
@@ -469,7 +469,7 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
                         }
                         else {
 
-                            Toast.makeText(ProjectDetailsActivity.this, "github link not provided for this project.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(ProjectDetailsActivity.this, "Test link not provided for this project.", Toast.LENGTH_SHORT).show();
 
                         }
 
