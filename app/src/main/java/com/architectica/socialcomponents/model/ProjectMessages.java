@@ -1,12 +1,12 @@
 package com.architectica.socialcomponents.model;
 
-public class Messages {
+public class ProjectMessages {
 
     private String message, type;
 
     private String from;
 
-    public Messages(String from) {
+    public ProjectMessages(String from) {
         this.from = from;
     }
 
@@ -18,7 +18,7 @@ public class Messages {
         this.from = from;
     }
 
-    public Messages(String message, String type) {
+    public ProjectMessages(String message, String type) {
         this.message = message;
         this.type = type;
     }
@@ -39,7 +39,7 @@ public class Messages {
         this.type = type;
     }
 
-    public Messages() {
+    public ProjectMessages() {
 
     }
 

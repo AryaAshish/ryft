@@ -6,7 +6,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 
-public class Utils {
+public class ProjectUtils {
 
     public static int getDisplayWidth(Context context) {
         return getSize(context).x;

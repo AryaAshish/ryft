@@ -36,7 +36,7 @@ import com.architectica.socialcomponents.model.Comment;
 import com.architectica.socialcomponents.model.Profile;
 import com.architectica.socialcomponents.utils.FormatterUtil;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.architectica.socialcomponents.views.ExpandableTextView;
 
 /**
@@ -104,7 +104,7 @@ public class CommentViewHolder extends RecyclerView.ViewHolder {
                     fillComment(userName, comment, expandableTextView, dateTextView);
 
                     if (obj.getPhotoUrl() != null) {
-                        ImageUtil.loadImage(GlideApp.with(context), obj.getPhotoUrl(), avatarImageView);
+                        ProjectImageUtil.loadImage(GlideApp.with(context), obj.getPhotoUrl(), avatarImageView);
                     }
                 }
             }

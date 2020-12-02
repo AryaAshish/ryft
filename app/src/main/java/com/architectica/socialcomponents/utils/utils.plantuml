@@ -59,7 +59,7 @@ title __UTILS's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace utils {
-      class com.architectica.socialcomponents.utils.ImageUtil {
+      class com.architectica.socialcomponents.utils.ProjectImageUtil {
           {static} + TAG : String
           {static} + generateImageTitle()
           {static} + generatePostImageTitle()
@@ -177,7 +177,7 @@ title __UTILS's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace utils {
-      class com.architectica.socialcomponents.utils.Utils {
+      class com.architectica.socialcomponents.utils.ProjectUtils {
           {static} + getDisplayHeight()
           {static} + getDisplayWidth()
           {static} - getSize()

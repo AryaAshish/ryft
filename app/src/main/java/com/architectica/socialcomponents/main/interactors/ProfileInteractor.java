@@ -20,9 +20,9 @@ package com.architectica.socialcomponents.main.interactors;
 
 import android.content.Context;
 import android.net.Uri;
-import android.util.Log;
 
 import com.architectica.socialcomponents.model.Project;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.architectica.socialcomponents.utils.ValidationUtil;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,7 +46,6 @@ import com.architectica.socialcomponents.managers.listeners.OnObjectExistListene
 import com.architectica.socialcomponents.managers.listeners.OnProfileCreatedListener;
 import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.model.Profile;
-import com.architectica.socialcomponents.utils.ImageUtil;
 import com.architectica.socialcomponents.utils.LogUtil;
 
 import java.util.ArrayList;
@@ -96,7 +95,7 @@ public class ProfileInteractor {
     }
 
     public void createOrUpdateProfileWithImage(final Profile profile, Uri imageUri, final OnProfileCreatedListener onProfileCreatedListener) {
-        String imageTitle = ImageUtil.generateImageTitle(UploadImagePrefix.PROFILE, profile.getId());
+        String imageTitle = ProjectImageUtil.generateImageTitle(UploadImagePrefix.PROFILE, profile.getId());
 
         String contentType = ValidationUtil.getMimeType(imageUri,context);
         //String contentType = "image";

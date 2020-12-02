@@ -31,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.architectica.socialcomponents.R;
-import com.architectica.socialcomponents.adapters.viewPager.TabsPagerAdapter;
 import com.architectica.socialcomponents.main.base.BaseActivity;
 import com.architectica.socialcomponents.main.search.posts.SearchPostsFragment;
 import com.architectica.socialcomponents.main.search.users.SearchUsersBySkillsFragment;
@@ -56,7 +55,7 @@ public class SearchActivity extends BaseActivity<SearchView, SearchPresenter> im
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
+        setContentView(R.layout.activity_search_project);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();

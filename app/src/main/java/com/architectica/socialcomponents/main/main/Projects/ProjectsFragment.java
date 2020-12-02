@@ -11,6 +11,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
+import im.ene.toro.widget.Container;
 import retrofit2.http.POST;
 
 import android.view.LayoutInflater;
@@ -43,7 +44,7 @@ import static android.app.Activity.RESULT_OK;
 public class ProjectsFragment extends BaseFragment<ProjectsView,ProjectsPresenter> implements ProjectsView{
 
     private ProjectsAdapter postsAdapter;
-    private RecyclerView recyclerView;
+    private Container recyclerView;
     private FloatingActionButton floatingActionButton;
 
     private TextView newPostsCounterTextView;
@@ -246,34 +247,8 @@ public class ProjectsFragment extends BaseFragment<ProjectsView,ProjectsPresente
     @Override
     public void openPostDetailsActivity(Post post, View v) {
         Intent intent = new Intent(getActivity(), ProjectDetailsActivity.class);
-        intent.putExtra(ProjectDetailsActivity.PROJECT_ID_EXTRA_KEY, post.getId());
-
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            View imageView = v.findViewById(R.id.postImageView);
-            View authorImageView = v.findViewById(R.id.authorImageView);
-
-            if (imageView.getVisibility() != View.GONE) {
-
-                /*ActivityOptions options = ActivityOptions.
-                        makeSceneTransitionAnimation(getActivity(),
-                                new android.util.Pair<>(imageView, getString(R.string.post_image_transition_name)),
-                                new android.util.Pair<>(authorImageView, getString(R.string.post_author_image_transition_name))
-                        );*/
-
-                // startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST, options.toBundle());
-
-                startActivityForResult(intent, ProjectDetailsActivity.UPDATE_PROJECT_REQUEST);
-
-            } else {
-
-                startActivityForResult(intent, ProjectDetailsActivity.UPDATE_PROJECT_REQUEST);
-
-            }
-
-        } else {
-            startActivityForResult(intent, ProjectDetailsActivity.UPDATE_PROJECT_REQUEST);
-        }
+        intent.putExtra(ProjectDetailsActivity.PROJECT_ID_EXTRA_KEY, post);
+        startActivityForResult(intent, ProjectDetailsActivity.UPDATE_PROJECT_REQUEST);
     }
 
     @Override

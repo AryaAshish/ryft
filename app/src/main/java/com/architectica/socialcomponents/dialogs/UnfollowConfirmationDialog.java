@@ -31,7 +31,7 @@ import android.widget.TextView;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.model.Profile;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 
 /**
  * Created by Alexey on 11.05.18.
@@ -67,7 +67,7 @@ public class UnfollowConfirmationDialog extends DialogFragment {
 
         confirmationMessageTextView.setText(getString(R.string.unfollow_user_message, profile.getUsername()));
 
-        ImageUtil.loadImage(GlideApp.with(this), profile.getPhotoUrl(), imageView);
+        ProjectImageUtil.loadImage(GlideApp.with(this), profile.getPhotoUrl(), imageView);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view)

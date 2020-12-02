@@ -7,7 +7,8 @@
     android:layout_margin="10dp"
     android:orientation="vertical"
     android:paddingTop="@dimen/intrinsic_padding"
-    android:paddingRight="@dimen/intrinsic_padding">
+    android:paddingRight="@dimen/intrinsic_padding"
+    android:theme="@style/ProjectTheme">
 
     <LinearLayout
         android:id="@+id/layout"
@@ -32,7 +33,7 @@
                 android:layout_centerInParent="true"
                 android:visibility="visible" />
 
-            <com.architectica.socialcomponents.views.CircularImageView
+            <com.architectica.socialcomponents.views.ProjectCircularImageView
                 android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

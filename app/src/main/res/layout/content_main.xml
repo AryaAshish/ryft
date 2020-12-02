@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:mContext="com.architectica.socialcomponents.main.News.GoogleNewsActivity"
-    tools:showIn="@layout/activity_google_news">
+    tools:showIn="@layout/activity_google_news"
+    android:theme="@style/ProjectTheme">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout"

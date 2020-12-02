@@ -22,7 +22,7 @@ title __ADAPTERS's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace adapters {
-      class com.architectica.socialcomponents.adapters.ChatsListAdapter {
+      class com.architectica.socialcomponents.adapters.ProjectChatsListAdapter {
           - context : Context
           - profiles : List<Profile>
           + ChatsListAdapter()
@@ -36,7 +36,7 @@ title __ADAPTERS's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace adapters {
-      class com.architectica.socialcomponents.adapters.ChatsListAdapter.ChatsListViewHolder {
+      class com.architectica.socialcomponents.adapters.ProjectChatsListAdapter.ChatsListViewHolder {
           + displayName : TextView
           + ChatsListViewHolder()
       }
@@ -101,7 +101,7 @@ title __ADAPTERS's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace adapters {
-      class com.architectica.socialcomponents.adapters.MessageAdapter {
+      class com.architectica.socialcomponents.adapters.ProjectMessageAdapter {
           {static} + MSG_TYPE_LEFT : int
           {static} + MSG_TYPE_RIGHT : int
           - activity : Activity
@@ -119,7 +119,7 @@ title __ADAPTERS's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace adapters {
-      class com.architectica.socialcomponents.adapters.MessageAdapter.MessageViewHolder {
+      class com.architectica.socialcomponents.adapters.ProjectMessageAdapter.MessageViewHolder {
           + displayName : TextView
           + messageImage : ImageView
           + messageText : TextView
@@ -332,10 +332,10 @@ title __ADAPTERS's Class Diagram__\n
 
   com.architectica.socialcomponents.adapters.BasePostsAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
   com.architectica.socialcomponents.adapters.BasePostsAdapter o-- com.architectica.socialcomponents.main.base.BaseActivity : activity
-  com.architectica.socialcomponents.adapters.ChatsListAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
-  com.architectica.socialcomponents.adapters.ChatsListAdapter +-down- com.architectica.socialcomponents.adapters.ChatsListAdapter.ChatsListViewHolder
-  com.architectica.socialcomponents.adapters.ChatsListAdapter.ChatsListViewHolder -up-|> android.support.v7.widget.RecyclerView.ViewHolder
-  com.architectica.socialcomponents.adapters.ChatsListAdapter.ChatsListViewHolder o-- com.architectica.socialcomponents.views.CircularImageView : profileImage
+  com.architectica.socialcomponents.adapters.ProjectChatsListAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
+  com.architectica.socialcomponents.adapters.ProjectChatsListAdapter +-down- com.architectica.socialcomponents.adapters.ProjectChatsListAdapter.ChatsListViewHolder
+  com.architectica.socialcomponents.adapters.ProjectChatsListAdapter.ChatsListViewHolder -up-|> android.support.v7.widget.RecyclerView.ViewHolder
+  com.architectica.socialcomponents.adapters.ProjectChatsListAdapter.ChatsListViewHolder o-- com.architectica.socialcomponents.views.CircularImageView : profileImage
   com.architectica.socialcomponents.adapters.CommentsAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
   com.architectica.socialcomponents.adapters.CommentsAdapter o-- com.architectica.socialcomponents.adapters.CommentsAdapter.Callback : callback
   com.architectica.socialcomponents.adapters.CommentsAdapter +-down- com.architectica.socialcomponents.adapters.CommentsAdapter.Callback
@@ -343,10 +343,10 @@ title __ADAPTERS's Class Diagram__\n
   com.architectica.socialcomponents.adapters.FollowPostsAdapter o-- com.architectica.socialcomponents.main.base.BaseActivity : activity
   com.architectica.socialcomponents.adapters.FollowPostsAdapter o-- com.architectica.socialcomponents.adapters.FollowPostsAdapter.CallBack : callBack
   com.architectica.socialcomponents.adapters.FollowPostsAdapter +-down- com.architectica.socialcomponents.adapters.FollowPostsAdapter.CallBack
-  com.architectica.socialcomponents.adapters.MessageAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
-  com.architectica.socialcomponents.adapters.MessageAdapter +-down- com.architectica.socialcomponents.adapters.MessageAdapter.MessageViewHolder
-  com.architectica.socialcomponents.adapters.MessageAdapter.MessageViewHolder -up-|> android.support.v7.widget.RecyclerView.ViewHolder
-  com.architectica.socialcomponents.adapters.MessageAdapter.MessageViewHolder o-- com.architectica.socialcomponents.views.CircularImageView : profileImage
+  com.architectica.socialcomponents.adapters.ProjectMessageAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
+  com.architectica.socialcomponents.adapters.ProjectMessageAdapter +-down- com.architectica.socialcomponents.adapters.ProjectMessageAdapter.MessageViewHolder
+  com.architectica.socialcomponents.adapters.ProjectMessageAdapter.MessageViewHolder -up-|> android.support.v7.widget.RecyclerView.ViewHolder
+  com.architectica.socialcomponents.adapters.ProjectMessageAdapter.MessageViewHolder o-- com.architectica.socialcomponents.views.CircularImageView : profileImage
   com.architectica.socialcomponents.adapters.NewsAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
   com.architectica.socialcomponents.adapters.NewsAdapter +-down- com.architectica.socialcomponents.adapters.NewsAdapter.MyViewHolder
   com.architectica.socialcomponents.adapters.NewsAdapter.MyViewHolder -up-|> android.support.v7.widget.RecyclerView.ViewHolder

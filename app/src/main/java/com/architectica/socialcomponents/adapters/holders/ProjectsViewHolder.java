@@ -35,10 +35,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.LinearLayout;
 
-import com.architectica.socialcomponents.main.Hashtags.HashtagPostsActivity;
 import com.architectica.socialcomponents.main.Hashtags.HashtagProjectsActivity;
 import com.architectica.socialcomponents.main.interactors.PostInteractor;
 import com.architectica.socialcomponents.managers.DatabaseHelper;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -70,7 +70,6 @@ import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.model.Profile;
 import com.architectica.socialcomponents.utils.FormatterUtil;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
 import com.google.firebase.storage.StorageReference;
 import com.hendraanggrian.appcompat.widget.SocialTextView;
 import com.hendraanggrian.appcompat.widget.SocialView;
@@ -322,7 +321,7 @@ public class ProjectsViewHolder extends RecyclerView.ViewHolder {
             public void onObjectChanged(Profile obj) {
                 if (obj != null && obj.getPhotoUrl() != null) {
                     if (!baseActivity.isFinishing() && !baseActivity.isDestroyed()) {
-                        ImageUtil.loadImage(GlideApp.with(baseActivity), obj.getPhotoUrl(), authorImageView);
+                        ProjectImageUtil.loadImage(GlideApp.with(baseActivity), obj.getPhotoUrl(), authorImageView);
                     }
                 }
             }

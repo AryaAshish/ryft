@@ -11,8 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.architectica.socialcomponents.R;
-import com.architectica.socialcomponents.model.Messages;
-import com.architectica.socialcomponents.views.CircularImageView;
+import com.architectica.socialcomponents.model.ProjectMessages;
+import com.architectica.socialcomponents.views.ProjectCircularImageView;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -21,7 +21,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -29,15 +28,15 @@ import java.util.List;
  * Created by AkshayeJH on 24/07/17.
  */
 
-public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder>{
+public class ProjectMessageAdapter extends RecyclerView.Adapter<ProjectMessageAdapter.MessageViewHolder>{
 
-    private List<Messages> mMessageList;
+    private List<ProjectMessages> mMessageList;
     private DatabaseReference mUserDatabase;
     private Activity activity;
     public static final int MSG_TYPE_LEFT = 0;
     public static final int MSG_TYPE_RIGHT = 1;
 
-    public MessageAdapter(Activity activity,List<Messages> mMessageList) {
+    public ProjectMessageAdapter(Activity activity, List<ProjectMessages> mMessageList) {
 
         this.activity = activity;
         this.mMessageList = mMessageList;
@@ -48,16 +47,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
 //        View v = LayoutInflater.from(parent.getContext())
-//                .inflate(R.layout.message_left_layout, parent, false);
+//                .inflate(R.layout.message_left_layout_project, parent, false);
 //        return new MessageViewHolder(v);
 
         if (viewType == MSG_TYPE_RIGHT) {
             View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.message_right_layout, parent, false);
+                    .inflate(R.layout.message_right_layout_project, parent, false);
             return new MessageViewHolder(v);
         } else {
             View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.message_left_layout, parent, false);
+                    .inflate(R.layout.message_left_layout_project, parent, false);
             return new MessageViewHolder(v);
         }
 
@@ -67,7 +66,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
         public TextView messageText;
         public TextView downloadText;
-        public CircularImageView profileImage;
+        public ProjectCircularImageView profileImage;
         public TextView displayName;
         public ImageView messageImage;
 
@@ -76,7 +75,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             messageText = (TextView) view.findViewById(R.id.message_text_layout);
             downloadText = (TextView) view.findViewById(R.id.message_download_layout);
-            profileImage = (CircularImageView) view.findViewById(R.id.message_profile_layout);
+            profileImage = (ProjectCircularImageView) view.findViewById(R.id.message_profile_layout);
             displayName = (TextView) view.findViewById(R.id.name_text_layout);
             messageImage = (ImageView) view.findViewById(R.id.message_image_layout);
 
@@ -86,7 +85,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
     @Override
     public void onBindViewHolder(final MessageViewHolder viewHolder, int i) {
 
-        Messages c = mMessageList.get(i);
+        ProjectMessages c = mMessageList.get(i);
 
         String from_user = c.getFrom();
         String message_type = c.getType();

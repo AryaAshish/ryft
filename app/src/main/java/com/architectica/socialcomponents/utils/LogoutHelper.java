@@ -19,9 +19,13 @@ package com.architectica.socialcomponents.utils;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+import io.reactivex.disposables.Disposable;
+import sdk.chat.core.session.ChatSDK;
 
 import com.bumptech.glide.Glide;
 import com.facebook.FacebookSdk;
@@ -44,22 +48,30 @@ public class LogoutHelper {
     private static ClearImageCacheAsyncTask clearImageCacheAsyncTask;
 
     public static void signOut(GoogleApiClient mGoogleApiClient, FragmentActivity fragmentActivity) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            ProfileInteractor.getInstance(fragmentActivity.getApplicationContext())
-                    .removeRegistrationToken(FirebaseInstanceId.getInstance().getToken(), user.getUid());
 
-            for (UserInfo profile : user.getProviderData()) {
-                String providerId = profile.getProviderId();
-                logoutByProvider(providerId, mGoogleApiClient, fragmentActivity);
+        Disposable d = ChatSDK.auth().logout().subscribe(() -> {
+
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            if (user != null) {
+                ProfileInteractor.getInstance(fragmentActivity.getApplicationContext())
+                        .removeRegistrationToken(FirebaseInstanceId.getInstance().getToken(), user.getUid());
+
+                for (UserInfo profile : user.getProviderData()) {
+                    String providerId = profile.getProviderId();
+                    logoutByProvider(providerId, mGoogleApiClient, fragmentActivity);
+                }
+                logoutFirebase(fragmentActivity.getApplicationContext());
             }
-            logoutFirebase(fragmentActivity.getApplicationContext());
-        }
 
-        if (clearImageCacheAsyncTask == null) {
-            clearImageCacheAsyncTask = new ClearImageCacheAsyncTask(fragmentActivity.getApplicationContext());
-            clearImageCacheAsyncTask.execute();
-        }
+            if (clearImageCacheAsyncTask == null) {
+                clearImageCacheAsyncTask = new ClearImageCacheAsyncTask(fragmentActivity.getApplicationContext());
+                clearImageCacheAsyncTask.execute();
+            }
+
+        }, throwable -> {
+            Toast.makeText(fragmentActivity, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+
     }
 
     private static void logoutByProvider(String providerId, GoogleApiClient mGoogleApiClient, FragmentActivity fragmentActivity) {

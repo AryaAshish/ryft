@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="10dp"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:theme="@style/ProjectTheme">
 
     <LinearLayout
         android:id="@+id/watchersContainer"

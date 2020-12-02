@@ -7,6 +7,7 @@
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:padding="@dimen/intrinsic_padding"
+    android:theme="@style/ProjectTheme"
     tools:context="com.architectica.socialcomponents.main.editProfile.EditProfileActivity">
 
     <ScrollView
@@ -38,7 +39,7 @@
                     android:indeterminateTint="@color/AppTheme"
                     android:visibility="visible" />
 
-                <com.architectica.socialcomponents.views.CircularImageView
+                <com.architectica.socialcomponents.views.ProjectCircularImageView
                     android:id="@+id/imageView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

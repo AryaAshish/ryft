@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#FFFFFF</color>
-    <color name="primary_dark">#EEEEEE</color>
+    <color name="primary_project">#FFFFFF</color>
+    <color name="primary_dark_project">#EEEEEE</color>
     <color name="primary_light">#D7CCC8</color>
     <color name="dart_transparent">#81000000</color>
 
@@ -67,4 +67,5 @@
     <color name="follow_button_pressed_color">#3930C7</color>
     <color name="follow_button_light_color">@color/white</color>
     <color name="follow_button_light_pressed_color">#f7f7f7</color>
+
 </resources>

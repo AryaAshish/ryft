@@ -2,9 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary">
+    android:theme="@style/ProjectTheme"
+    android:background="@color/primary_project">
 
-    <com.architectica.socialcomponents.views.CircularImageView
+    <com.architectica.socialcomponents.views.ProjectCircularImageView
         android:id="@+id/custom_bar_image"
         android:layout_width="36dp"
         android:layout_height="36dp"

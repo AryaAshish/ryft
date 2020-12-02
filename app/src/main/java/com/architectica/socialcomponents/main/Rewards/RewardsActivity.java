@@ -260,32 +260,7 @@ public class RewardsActivity extends BaseActivity<RewardsView,RewardsPresenter> 
     public void openPostDetailsActivity(Post post, View v) {
         Intent intent = new Intent(this, RewardDetailsActivity.class);
         intent.putExtra(RewardDetailsActivity.REWARD_ID_EXTRA_KEY, post.getId());
-
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            View imageView = v.findViewById(R.id.postImageView);
-            View authorImageView = v.findViewById(R.id.authorImageView);
-
-            if (imageView.getVisibility() != View.GONE){
-
-                ActivityOptions options = ActivityOptions.
-                        makeSceneTransitionAnimation(this,
-                                new android.util.Pair<>(imageView, getString(R.string.post_image_transition_name)),
-                                new android.util.Pair<>(authorImageView, getString(R.string.post_author_image_transition_name))
-                        );
-
-                startActivityForResult(intent, RewardDetailsActivity.UPDATE_REWARD_REQUEST, options.toBundle());
-
-            }
-            else {
-
-                startActivityForResult(intent, RewardDetailsActivity.UPDATE_REWARD_REQUEST);
-
-            }
-
-        } else {
-            startActivityForResult(intent, RewardDetailsActivity.UPDATE_REWARD_REQUEST);
-        }
+        startActivityForResult(intent, RewardDetailsActivity.UPDATE_REWARD_REQUEST);
     }
 
     @Override

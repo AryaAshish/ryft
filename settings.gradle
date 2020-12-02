@@ -1,1 +1,3 @@
+include ':toro-exoplayer'
+include ':toro-core'
 include ':app'

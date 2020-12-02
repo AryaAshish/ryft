@@ -33,7 +33,7 @@ import android.widget.ImageView;
 
 import com.architectica.socialcomponents.R;
 
-public class CircularImageView extends ImageView {
+public class ProjectCircularImageView extends ImageView {
     private static final ScaleType SCALE_TYPE = ScaleType.CENTER_CROP;
 
     // Default Values
@@ -53,15 +53,15 @@ public class CircularImageView extends ImageView {
     private Paint paintBorder;
 
     //region Constructor & Init Method
-    public CircularImageView(final Context context) {
+    public ProjectCircularImageView(final Context context) {
         this(context, null);
     }
 
-    public CircularImageView(Context context, AttributeSet attrs) {
+    public ProjectCircularImageView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public CircularImageView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ProjectCircularImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs, defStyleAttr);
     }
@@ -75,19 +75,19 @@ public class CircularImageView extends ImageView {
         paintBorder.setAntiAlias(true);
 
         // Load the styled attributes and set their properties
-        TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.CircularImageView, defStyleAttr, 0);
+        TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.ProjectCircularImageView, defStyleAttr, 0);
 
         // Init Border
-        if (attributes.getBoolean(R.styleable.CircularImageView_border, true)) {
+        if (attributes.getBoolean(R.styleable.ProjectCircularImageView_border, true)) {
             float defaultBorderSize = DEFAULT_BORDER_WIDTH * getContext().getResources().getDisplayMetrics().density;
-            setBorderWidth(attributes.getDimension(R.styleable.CircularImageView_border_width, defaultBorderSize));
-            setBorderColor(attributes.getColor(R.styleable.CircularImageView_border_color, Color.WHITE));
+            setBorderWidth(attributes.getDimension(R.styleable.ProjectCircularImageView_border_width, defaultBorderSize));
+            setBorderColor(attributes.getColor(R.styleable.ProjectCircularImageView_border_color, Color.WHITE));
         }
 
         // Init Shadow
-        if (attributes.getBoolean(R.styleable.CircularImageView_shadow, false)) {
+        if (attributes.getBoolean(R.styleable.ProjectCircularImageView_shadow, false)) {
             shadowRadius = DEFAULT_SHADOW_RADIUS * getContext().getResources().getDisplayMetrics().density;
-            drawShadow(attributes.getDimension(R.styleable.CircularImageView_shadow_radius, shadowRadius), attributes.getColor(R.styleable.CircularImageView_shadow_color, shadowColor));
+            drawShadow(attributes.getDimension(R.styleable.ProjectCircularImageView_shadow_radius, shadowRadius), attributes.getColor(R.styleable.ProjectCircularImageView_shadow_color, shadowColor));
         }
     }
     //endregion

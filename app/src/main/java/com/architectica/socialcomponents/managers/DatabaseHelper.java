@@ -19,6 +19,7 @@ package com.architectica.socialcomponents.managers;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
@@ -89,7 +90,9 @@ public class DatabaseHelper {
     }
 
     public StorageReference getStorageReference() {
-        return storage.getReferenceFromUrl(context.getResources().getString(R.string.storage_link));
+        Log.i("storage_link","" + context.getResources().getString(R.string.storage_link));
+        Log.i("storage","" + storage);
+        return FirebaseStorage.getInstance().getReferenceFromUrl(context.getResources().getString(R.string.storage_link));
     }
 
     public DatabaseReference getDatabaseReference() {

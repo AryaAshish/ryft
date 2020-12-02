@@ -8,12 +8,10 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.TextAppearanceSpan;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,7 +36,7 @@ import com.architectica.socialcomponents.managers.FollowManager;
 import com.architectica.socialcomponents.managers.ProfileManager;
 import com.architectica.socialcomponents.model.Profile;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.architectica.socialcomponents.utils.LogoutHelper;
 import com.architectica.socialcomponents.views.FollowButton;
 import com.bumptech.glide.load.DataSource;
@@ -141,7 +139,7 @@ public class ProfileActivity extends BaseActivity<ProfileView,ProfilePresenter> 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_profile);
+        setContentView(R.layout.fragment_profile_project);
 
         //POST_TYPE = "post";
 
@@ -470,7 +468,7 @@ public class ProfileActivity extends BaseActivity<ProfileView,ProfilePresenter> 
 
     @Override
     public void setProfilePhoto(String photoUrl) {
-        ImageUtil.loadImage(GlideApp.with(this), photoUrl, imageView, new RequestListener<Drawable>() {
+        ProjectImageUtil.loadImage(GlideApp.with(this), photoUrl, imageView, new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 scheduleStartPostponedTransition(imageView);

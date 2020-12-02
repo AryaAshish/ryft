@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.architectica.socialcomponents.model.Project;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.architectica.socialcomponents.utils.ValidationUtil;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -37,7 +38,6 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.architectica.socialcomponents.ApplicationHelper;
@@ -55,7 +55,6 @@ import com.architectica.socialcomponents.managers.listeners.OnTaskCompleteListen
 import com.architectica.socialcomponents.model.Like;
 import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.model.PostListResult;
-import com.architectica.socialcomponents.utils.ImageUtil;
 import com.architectica.socialcomponents.utils.LogUtil;
 
 import java.util.ArrayList;
@@ -1224,7 +1223,7 @@ public class PostInteractor {
 
         String contentType = ValidationUtil.getMimeType(imageUri,context);
 
-        final String imageTitle = ImageUtil.generatePostImageTitle(post.getId());
+        final String imageTitle = ProjectImageUtil.generatePostImageTitle(post.getId());
         UploadTask uploadTask = databaseHelper.uploadImage(imageUri, imageTitle, contentType);
 
         if (uploadTask != null) {
@@ -1269,7 +1268,7 @@ public class PostInteractor {
 
         String contentType = ValidationUtil.getMimeType(imageUri,context);
 
-        final String imageTitle = ImageUtil.generatePostImageTitle(post.getId());
+        final String imageTitle = ProjectImageUtil.generatePostImageTitle(post.getId());
         UploadTask uploadTask = databaseHelper.uploadImage(imageUri, imageTitle, contentType);
 
         if (uploadTask != null) {
@@ -1315,7 +1314,7 @@ public class PostInteractor {
 
         String contentType = ValidationUtil.getMimeType(imageUri,context);
 
-        final String imageTitle = ImageUtil.generatePostImageTitle(post.getId());
+        final String imageTitle = ProjectImageUtil.generatePostImageTitle(post.getId());
         UploadTask uploadTask = databaseHelper.uploadImage(imageUri, imageTitle, contentType);
 
         if (uploadTask != null) {

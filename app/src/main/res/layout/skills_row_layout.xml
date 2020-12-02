@@ -8,6 +8,7 @@
     android:layout_marginBottom="20dp"
     android:layout_marginRight="20dp"
     android:layout_marginLeft="20dp"
+    android:theme="@style/ProjectTheme"
     android:background="@drawable/linear_layout_in_activity_first_run_second_background">
 
     <EditText

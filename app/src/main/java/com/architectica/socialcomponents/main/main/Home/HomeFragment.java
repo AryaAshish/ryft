@@ -1,7 +1,6 @@
 package com.architectica.socialcomponents.main.main.Home;
 
 import android.annotation.SuppressLint;
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -9,11 +8,17 @@ import androidx.annotation.NonNull;
 
 import com.architectica.socialcomponents.main.main.Notifications.NotificationsActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
+import im.ene.toro.PlayerSelector;
+import im.ene.toro.widget.Container;
+
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,7 +32,6 @@ import android.widget.TextView;
 
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.adapters.PostsAdapter;
-import com.architectica.socialcomponents.main.Chat.ChatActivity;
 import com.architectica.socialcomponents.main.base.BaseFragment;
 import com.architectica.socialcomponents.main.main.MainActivity;
 import com.architectica.socialcomponents.main.post.createPost.CreatePostActivity;
@@ -36,10 +40,6 @@ import com.architectica.socialcomponents.main.profile.ProfileActivity;
 import com.architectica.socialcomponents.main.search.SearchActivity;
 import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.utils.AnimationUtils;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.architectica.socialcomponents.main.login.LoginActivity;
 
@@ -48,7 +48,7 @@ import static android.app.Activity.RESULT_OK;
 public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implements HomeView {
 
     private PostsAdapter postsAdapter;
-    private RecyclerView recyclerView;
+    private Container recyclerView;
     private FloatingActionButton floatingActionButton;
 
     private TextView newPostsCounterTextView;
@@ -84,7 +84,7 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
             case R.id.search:
                 Intent searchIntent = new Intent(getActivity(), SearchActivity.class);
                 startActivity(searchIntent);
-                //finish();
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -152,6 +152,23 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
         initContentView(view);
 
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        // Add following snippet in Activity#onCreate or Fragment#onViewCreated
+        // Only when you use Container inside a CoordinatorLayout and depends on Behavior.
+        // 1. Request Container's LayoutParams
+        ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
+        // 2. Only continue if it is of type CoordinatorLayout.LayoutParams
+        if (params != null && params instanceof CoordinatorLayout.LayoutParams) {
+            // 3. Check if there is an already set CoordinatorLayout.Behavior. If not, just ignore everything.
+            CoordinatorLayout.Behavior behavior = ((CoordinatorLayout.LayoutParams) params).getBehavior();
+            if (behavior != null) {
+                ((CoordinatorLayout.LayoutParams) params).setBehavior(new Container.Behavior(behavior));
+            }
+        }
+        super.onViewCreated(view, savedInstanceState);
     }
 
     @Override
@@ -246,10 +263,11 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         // ((SimpleItemAnimator) recyclerView.getItemAnimator()).setSupportsChangeAnimations(false);
         recyclerView.setAdapter(postsAdapter);
-        recyclerView.setHasFixedSize(true);
+        //recyclerView.setHasFixedSize(true);
         recyclerView.setItemViewCacheSize(20);
         recyclerView.setDrawingCacheEnabled(true);
         recyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+        recyclerView.setPlayerDispatcher(player -> player.getPlayerOrder() % 3 == 0 ? 250 : 1000);
         postsAdapter.loadFirstPage();
     }
 
@@ -300,33 +318,7 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
     public void openPostDetailsActivity(Post post, View v) {
         Intent intent = new Intent(getActivity(), PostDetailsActivity.class);
         intent.putExtra(PostDetailsActivity.POST_ID_EXTRA_KEY, post.getId());
-
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            View imageView = v.findViewById(R.id.postImageView);
-            View authorImageView = v.findViewById(R.id.authorImageView);
-
-            if (imageView.getVisibility() != View.GONE) {
-
-                /*ActivityOptions options = ActivityOptions.
-                        makeSceneTransitionAnimation(getActivity(),
-                                new android.util.Pair<>(imageView, getString(R.string.post_image_transition_name)),
-                                new android.util.Pair<>(authorImageView, getString(R.string.post_author_image_transition_name))
-                        );*/
-
-               // startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST, options.toBundle());
-
-                startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST);
-
-            } else {
-
-                startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST);
-
-            }
-
-        } else {
-            startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST);
-        }
+        startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST);
     }
 
     public void showFloatButtonRelatedSnackBar(int messageId) {
@@ -347,7 +339,7 @@ public class HomeFragment extends BaseFragment<HomeView, HomePresenter> implemen
             Intent intent = new Intent(getActivity(), ProfileActivity.class);
             intent.putExtra(ProfileActivity.USER_ID_EXTRA_KEY, userId);
             startActivityForResult(intent, ProfileActivity.CREATE_POST_FROM_PROFILE_REQUEST);
-            //finish();
+            //ActivityCompat.finishAffinity(getActivity());
         }else {
             Intent intent=new Intent(getActivity(),LoginActivity.class);
             startActivity(intent);

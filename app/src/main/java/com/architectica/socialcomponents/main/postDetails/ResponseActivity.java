@@ -1,6 +1,8 @@
 package com.architectica.socialcomponents.main.postDetails;
 
+import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -20,6 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
+import io.reactivex.disposables.Disposable;
+import sdk.chat.core.dao.Thread;
+import sdk.chat.core.dao.User;
+import sdk.chat.core.interfaces.UserListItem;
+import sdk.chat.core.session.ChatSDK;
+import sdk.guru.common.RX;
 
 import static com.architectica.socialcomponents.main.postDetails.ProjectDetailsActivity.PROJECT_ID_EXTRA_KEY;
 
@@ -149,63 +157,37 @@ public class ResponseActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
 
-                        DataSnapshot dataSnapshot1 = dataSnapshot.child("projects/" + postId);
+                        List<UserListItem> users = new ArrayList<>();
 
-                        boolean isFirst = false;
+                        User user = ChatSDK.db().fetchUserWithEntityID(appliedUserId);
 
-                        HashMap<String,Object> selecteduser = new HashMap<>();
+                        users.add(user);
 
-                        selecteduser.put("userid",appliedUserId);
+                        Thread thread = ChatSDK.db().fetchThreadWithEntityID(postId);
 
-                        if(!dataSnapshot1.hasChild("selectedCandidates")){
+                        ChatSDK.thread().addUsersToThread(thread, User.convertIfPossible(users))
+                                .observeOn(RX.main())
+                                .doFinally(() -> {
+                                    HashMap<String,Object> selecteduser = new HashMap<>();
 
-                            isFirst = true;
+                                    selecteduser.put("userid",appliedUserId);
 
-                        }
+                                    FirebaseDatabase.getInstance().getReference("projects/" + postId).child("selectedCandidates").child(appliedUserId).setValue(selecteduser);
 
-                        FirebaseDatabase.getInstance().getReference("projects/" + postId).child("selectedCandidates").child(appliedUserId).setValue(selecteduser);
+                                    HashMap<String,Object> selectedProject = new HashMap<>();
 
-                        HashMap<String,Object> selectedProject = new HashMap<>();
+                                    selectedProject.put("projectid",postId);
 
-                        selectedProject.put("projectid",postId);
+                                    FirebaseDatabase.getInstance().getReference("profiles/" + appliedUserId + "/selections").child(postId).setValue(selectedProject);
 
-                        FirebaseDatabase.getInstance().getReference("profiles/" + appliedUserId + "/selections").child(postId).setValue(selectedProject);
-
-                        if(isFirst){
-
-                            HashMap<String,Object> addOwner = new HashMap<>();
-
-                            String owner = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                            addOwner.put("userid",owner);
-
-                            FirebaseDatabase.getInstance().getReference("groupchats").child(postId).child("users").push().setValue(addOwner);
-
-                            DataSnapshot dataSnapshot2 = dataSnapshot.child("profiles");
-
-                            String adminUid = "";
-
-                            for (DataSnapshot dataSnapshot3 : dataSnapshot2.getChildren()){
-
-                                if ("RiftAdmin".equals(dataSnapshot3.child("username").getValue(String.class))){
-
-                                    adminUid = dataSnapshot3.getKey();
-
-                                }
-
-                            }
-
-                            HashMap<String,Object> addAdmin = new HashMap<>();
-
-                            addAdmin.put("userid",adminUid);
-
-                            FirebaseDatabase.getInstance().getReference("groupchats").child(postId).child("users").push().setValue(addAdmin);
-
-                        }
-
-                        FirebaseDatabase.getInstance().getReference("groupchats").child(postId).child("users").push().setValue(selecteduser);
-
-                        finish();
+                                    finish();
+                                })
+                                .subscribe(() -> {
+                                    setResult(Activity.RESULT_OK);
+                                }, throwable -> {
+                                    Toast.makeText(ResponseActivity.this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                                    setResult(Activity.RESULT_CANCELED);
+                                });
 
                     }
 

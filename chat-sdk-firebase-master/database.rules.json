@@ -1,0 +1,352 @@
+{
+  "rules": {
+    "$sandbox": {
+      "firestream": {
+        "users": {
+          "$user_id": {
+            "messages": {
+              ".indexOn": [
+                "from",
+                "date"
+              ]
+            }
+          }
+        },
+        ".read": "true",
+        ".write": "true"
+      },
+      "time": {
+        "$uid": {
+          ".validate": "newData.val() == now",
+          ".read": "(auth != null && auth.uid == $uid)",
+          ".write": "(auth != null && auth.uid == $uid)"
+        }
+      },
+      "config": {
+        ".read": "auth != null"
+      },
+      "online": {
+        "$uid": {
+          "time": {
+            ".validate": "newData.val() == now"
+          },
+          "uid": {
+            ".validate": "(auth != null && auth.uid == $uid)"
+          }
+        },
+        ".read": "auth != null"
+      },
+      "flagged": {
+        "messages": {
+          "$mid": {
+            "creator": {
+              ".validate": "(root.child($sandbox + '/users/' + newData.val()).val() != null && newData.isString())"
+            },
+            "creator-entity-id": {
+              ".validate": "(root.child($sandbox + '/users/' + newData.val()).val() != null && newData.isString())"
+            },
+            "from": {
+              ".validate": "(root.child($sandbox + '/users/' + newData.val()).val() != null && newData.isString())"
+            },
+            "thread": {
+              ".validate": "(root.child($sandbox + '/threads/' + newData.val()).val() != null && newData.isString())"
+            },
+            ".validate": "(newData.hasChildren(['creator', 'from', 'thread', 'message', 'date']) && root.child($sandbox + '/threads/' + newData.child('thread').val() + '/messages/' + $mid).val() != null)",
+            "sender-entity-id": {
+              ".validate": "newData.isString()"
+            },
+            "message": {
+              ".validate": "true"
+            },
+            "date": {
+              ".validate": "(newData.isNumber() && newData.val() == now)"
+            },
+            "$other": {
+              ".validate": "false"
+            },
+            ".read": "((data.val() != null || data.child('creator').val() == auth.uid) || data.child('creator-entity-id').val() == auth.uid)",
+            ".write": "((data.val() != null || newData.child('creator').val() == auth.uid) || newData.child('creator-entity-id').val() == auth.uid)"
+          }
+        }
+      },
+      "public-threads": {
+        "$tid": {
+          ".write": "((auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null) && (data.val() == null || (root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid)))"
+        },
+        ".read": "(auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null)",
+        ".indexOn": [
+          "creation-date"
+        ]
+      },
+      "threads": {
+        "$tid": {
+          "details": {
+            "creator-entity-id": {
+              ".validate": "((newData.isString() && newData.val() == auth.uid) && data.val() == null)"
+            },
+            "creator": {
+              ".validate": "((newData.isString() && newData.val() == auth.uid) && data.val() == null)"
+            },
+            "creation-date": {
+              ".validate": "((newData.isNumber() && newData.val() == now) && data.val() == null)"
+            },
+            "name": {
+              ".validate": "(newData.isString() && newData.val().length < 100)"
+            },
+            "type": {
+              ".validate": "newData.isNumber()"
+            },
+            "type_v4": {
+              ".validate": "newData.isNumber()"
+            },
+            ".validate": "true",
+            ".read": "((auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null) && ((data.val() == null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) || root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))",
+            ".write": "((auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null) && (data.val() == null || (((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) || root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'owner') || (root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'admin' && root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))))"
+          },
+          "meta": {
+            "creator-entity-id": {
+              ".validate": "((newData.isString() && newData.val() == auth.uid) && data.val() == null)"
+            },
+            "creator": {
+              ".validate": "((newData.isString() && newData.val() == auth.uid) && data.val() == null)"
+            },
+            "creation-date": {
+              ".validate": "((newData.isNumber() && newData.val() == now) && data.val() == null)"
+            },
+            "name": {
+              ".validate": "(newData.isString() && newData.val().length < 100)"
+            },
+            "type": {
+              ".validate": "newData.isNumber()"
+            },
+            "type_v4": {
+              ".validate": "newData.isNumber()"
+            },
+            ".validate": "true",
+            ".read": "((auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null) && ((data.val() == null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) || root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))",
+            ".write": "((auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null) && (data.val() == null || (((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) || root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'owner') || (root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'admin' && root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))))"
+          },
+          "permissions": {
+            "$uid": {
+              ".validate": "((((((newData.val() == 'owner' || newData.val() == 'admin') || newData.val() == 'member') || newData.val() == 'watcher') || newData.val() == 'banned') && root.child($sandbox + '/threads/' + $tid + '/users/' + $uid).val() != null) && (((((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) && auth.uid == $uid) && newData.val() == 'owner') || (newData.val() == 'admin' && ((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) || root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'owner'))) || (((newData.val() == 'member' || newData.val() == 'watcher') || newData.val() == 'banned') && (((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) || root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'owner') || (root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'admin' && root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null)))))"
+            },
+            ".validate": "true",
+            ".read": "((auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null) && ((data.val() == null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) || root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))",
+            ".write": "((((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) && data.val() == null) || (((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) || root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'owner') || (root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'admin' && root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))) || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4))"
+          },
+          "lastMessage": {
+            ".validate": "true",
+            ".read": "((root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'banned'))",
+            ".write": "(((root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'banned')) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'watcher'))"
+          },
+          "update": {
+            ".validate": "newData.hasChildren(['details', 'meta', 'messages', 'users'])",
+            "details": {
+              ".validate": "(newData.isNumber() && newData.val() == now)"
+            },
+            "meta": {
+              ".validate": "(newData.isNumber() && newData.val() == now)"
+            },
+            "messages": {
+              ".validate": "(newData.isNumber() && newData.val() == now)"
+            },
+            "users": {
+              ".validate": "(newData.isNumber() && newData.val() == now)"
+            },
+            "$other": {
+              ".validate": "false"
+            },
+            ".read": "((auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null) && ((data.val() == null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) || root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))",
+            ".write": "(((((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4) && root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null) || (((root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'banned')) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'watcher')))"
+          },
+          "messages": {
+            "$mid": {
+              "user-firebase-id": {
+                ".validate": "(((newData.isString() && data.val() == null) && (newData.val() == auth.uid || newData.val() == null)) && newData.isString())"
+              },
+              "date": {
+                ".validate": "(((newData.isNumber() && newData.val() == now) && newData.isNumber()) && newData.val() == now)"
+              },
+              "from": {
+                ".validate": "(((newData.isString() && data.val() == null) && (newData.val() == auth.uid || newData.val() == null)) && newData.isString())"
+              },
+              "to": {
+                "$key1": {
+                  ".validate": "newData.isString()"
+                },
+                ".validate": "newData.hasChildren()"
+              },
+              "meta": {
+                ".validate": "true"
+              },
+              "read": {
+                "$uid": {
+                  "date": {
+                    ".validate": "(newData.isNumber() && newData.val() == now)"
+                  },
+                  "status": {
+                    ".validate": "((newData.isNumber() && newData.val() >= 0) && newData.val() <= 2)"
+                  },
+                  ".validate": "(auth.uid == $uid || data.val() == null)"
+                },
+                ".validate": "true"
+              },
+              ".validate": "newData.hasChildren(['date', 'from', 'meta', 'type'])",
+              "type": {
+                ".validate": "newData.isNumber()"
+              },
+              "json_v2": {
+                ".validate": "true"
+              },
+              "$other": {
+                ".validate": "false"
+              },
+              ".write": "((((((root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'banned')) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'watcher')) && (data.val() == null || (root.child($sandbox + '/threads/' + $tid + '/messages/' + $mid + '/from').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/messages/' + $mid + '/user-firebase-id').val() == auth.uid))) || (((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) || root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'owner') || (root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'admin' && root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))) || ((((root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'banned')) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'watcher')) && newData.val() != null))"
+            },
+            ".validate": "true",
+            ".read": "((root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'banned'))",
+            ".indexOn": [
+              "date"
+            ]
+          },
+          "typing": {
+            "$uid": {
+              ".write": "(auth.uid == $uid && (((root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'banned')) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'watcher')))"
+            },
+            ".validate": "true",
+            ".read": "((root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) && !(root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'banned'))"
+          },
+          "users": {
+            "$uid": {
+              "status": {
+                ".validate": "((newData.val() == 'owner' && (root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == $uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == $uid)) || newData.val() == 'member')"
+              },
+              ".validate": "root.child($sandbox + '/users/' + $uid).val() != null",
+              ".write": "((((auth.uid == $uid && data.val() != null) || (auth.uid == $uid && (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4))) || (((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) || root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'owner') || (root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'admin' && root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))) || (root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid))"
+            },
+            ".validate": "true",
+            ".read": "((auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null) && ((data.val() == null || (((root.child($sandbox + '/threads/' + $tid + '/meta/type').val() == 4 || root.child($sandbox + '/threads/' + $tid + '/meta/type_v4').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type').val() == 4) || root.child($sandbox + '/threads/' + $tid + '/details/type_v4').val() == 4)) || root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))"
+          },
+          ".validate": "newData.hasChildren()",
+          "updated": {
+            ".validate": "true"
+          },
+          "$other": {
+            ".validate": "false"
+          }
+        }
+      },
+      "users": {
+        "$uid": {
+          "meta": {
+            "allow-invites": {
+              ".validate": "newData.isBoolean()"
+            },
+            "name": {
+              ".validate": "(newData.isString() && newData.val().length < 100)"
+            },
+            "name-lowercase": {
+              ".validate": "(newData.isString() && newData.val().length < 100)"
+            },
+            "pictureURL": {
+              ".validate": "newData.isString()"
+            },
+            "uid": {
+              ".validate": "newData.isString()"
+            },
+            "availability": {
+              ".validate": "newData.isString()"
+            },
+            "email": {
+              ".validate": "newData.isString()"
+            },
+            ".write": "auth.uid == $uid"
+          },
+          "online": {
+            ".validate": "newData.isBoolean()",
+            ".write": "auth.uid == $uid"
+          },
+          "updated": {
+            ".validate": "newData.hasChildren(['meta', 'threads', 'contacts', 'blocked'])",
+            "meta": {
+              ".validate": "(newData.isNumber() && newData.val() == now)"
+            },
+            "threads": {
+              ".validate": "(newData.isNumber() && newData.val() == now)"
+            },
+            "contacts": {
+              ".validate": "(newData.isNumber() && newData.val() == now)"
+            },
+            "blocked": {
+              ".validate": "(newData.isNumber() && newData.val() == now)"
+            },
+            "$other": {
+              ".validate": "false"
+            },
+            ".write": "auth.uid == $uid"
+          },
+          "last-online": {
+            ".validate": "(newData.isNumber() && newData.val() == now)",
+            ".write": "auth.uid == $uid"
+          },
+          "contacts": {
+            "$cid": {
+              ".validate": "root.child($sandbox + '/users/' + $cid).val() != null",
+              ".write": "auth.uid == $uid"
+            }
+          },
+          "blocked": {
+            "$bid": {
+              ".validate": "root.child($sandbox + '/users/' + $bid).val() != null",
+              ".write": "auth.uid == $uid"
+            }
+          },
+          "threads": {
+            "$tid": {
+              ".validate": "root.child($sandbox + '/threads/' + $tid).val() != null",
+              ".write": "(auth.uid == $uid || (((auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null) && root.child($sandbox + '/threads/' + $tid).val() != null) && (((root.child($sandbox + '/threads/' + $tid + '/meta/creator').val() == auth.uid || root.child($sandbox + '/threads/' + $tid + '/details/creator-entity-id').val() == auth.uid) || root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'owner') || (root.child($sandbox + '/threads/' + $tid + '/permissions/' + auth.uid).val() == 'admin' && root.child($sandbox + '/threads/' + $tid + '/users/' + auth.uid).val() != null))))"
+            }
+          }
+        },
+        ".read": "auth != null",
+        ".indexOn": [
+          "meta/name",
+          "meta/phone",
+          "meta/email",
+          "meta/location",
+          "meta/country-code",
+          "meta/username",
+          "meta/name-lowercase"
+        ]
+      },
+      "location": {
+        "$key": {
+          "g": {
+            ".validate": "true"
+          },
+          "l": {
+            "0": {
+              ".validate": "((newData.isNumber() && newData.val() >= -90) && newData.val() <= 90)"
+            },
+            "1": {
+              ".validate": "((newData.isNumber() && newData.val() >= -180) && newData.val() <= 180)"
+            },
+            "$other": {
+              ".validate": "false"
+            },
+            ".validate": "true"
+          },
+          "$other": {
+            ".validate": "false"
+          },
+          ".validate": "newData.hasChildren(['g', 'l'])",
+          ".write": "(auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null)"
+        },
+        ".read": "(auth != null && root.child($sandbox + '/users/' + auth.uid).val() != null)",
+        ".indexOn": [
+          "g"
+        ]
+      }
+    }
+  }
+}

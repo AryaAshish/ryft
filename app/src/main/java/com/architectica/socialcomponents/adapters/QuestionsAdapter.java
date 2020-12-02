@@ -1,7 +1,6 @@
 package com.architectica.socialcomponents.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,11 +8,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.architectica.socialcomponents.R;
-import com.architectica.socialcomponents.main.Chat.ChatActivity;
-import com.architectica.socialcomponents.main.postDetails.QuestionsActivity;
-import com.architectica.socialcomponents.model.Profile;
-import com.architectica.socialcomponents.views.CircularImageView;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 

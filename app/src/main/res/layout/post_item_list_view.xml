@@ -4,7 +4,9 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:theme="@style/ProjectTheme"
+    android:id="@+id/mediaContainer">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view"
@@ -26,7 +28,7 @@
                 android:layout_marginLeft="10dp"
                 android:orientation="horizontal">
 
-                <com.architectica.socialcomponents.views.CircularImageView
+                <com.architectica.socialcomponents.views.ProjectCircularImageView
                     android:id="@+id/authorImageView"
                     android:layout_width="@dimen/post_list_item_author_image_side"
                     android:layout_height="@dimen/post_list_item_author_image_side"
@@ -60,32 +62,40 @@
                         android:textSize="12sp" />
                 </LinearLayout>
 
-
-
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/postImageView"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/post_list_item_image_height"
-                android:scaleType="centerCrop" />
+                android:layout_height="@dimen/post_list_item_image_height">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center">
-
-                <com.google.android.exoplayer2.ui.PlayerView
+                <ImageView
+                    android:id="@+id/postImageView"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:id="@+id/postVideoView"
+                    android:layout_height="@dimen/post_list_item_image_height"
+                    android:scaleType="centerCrop" />
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyle"
                     android:visibility="gone"
-                    android:background="@color/black"
-                    app:resize_mode="fill">
+                    android:layout_centerInParent="true" />
 
-                </com.google.android.exoplayer2.ui.PlayerView>
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/ic_volume_up_grey_24dp"
+                    android:id="@+id/volume_control"
+                    android:alpha="0"
+                    android:animateLayoutChanges="true"
+                    android:layout_marginEnd="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"/>
 
-            </LinearLayout>
+            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"

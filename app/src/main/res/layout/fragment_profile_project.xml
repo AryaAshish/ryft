@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
-    tools:context=".main.profile.ProfileActivity">
+    tools:context=".main.profile.ProfileActivity"
+    android:theme="@style/ProjectTheme">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"

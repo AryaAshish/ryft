@@ -17,7 +17,7 @@ title __ALLUSERSLIST's Class Diagram__\n
   
 
   com.architectica.socialcomponents.AllUsersList.UsersActivity -up-|> android.support.v7.app.AppCompatActivity
-  com.architectica.socialcomponents.AllUsersList.UsersActivity o-- com.architectica.socialcomponents.adapters.ChatsListAdapter : adapter
+  com.architectica.socialcomponents.AllUsersList.UsersActivity o-- com.architectica.socialcomponents.adapters.ProjectChatsListAdapter : adapter
 
 
 right footer

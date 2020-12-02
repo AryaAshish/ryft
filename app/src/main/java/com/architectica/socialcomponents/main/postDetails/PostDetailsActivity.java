@@ -21,7 +21,6 @@ import android.animation.Animator;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,13 +45,11 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
-import com.architectica.socialcomponents.main.interactors.PostInteractor;
 import com.architectica.socialcomponents.main.login.LoginActivity;
 import com.architectica.socialcomponents.managers.DatabaseHelper;
 import com.architectica.socialcomponents.managers.ProfileManager;
-import com.architectica.socialcomponents.model.Profile;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.adapters.CommentsAdapter;
@@ -68,7 +65,6 @@ import com.architectica.socialcomponents.model.Comment;
 import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.utils.FormatterUtil;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -531,7 +527,7 @@ descriptionEditText.setText(description);
 
     @Override
     public void loadAuthorPhoto(String photoUrl) {
-        ImageUtil.loadImage(GlideApp.with(PostDetailsActivity.this), photoUrl, authorImageView, DiskCacheStrategy.DATA);
+        ProjectImageUtil.loadImage(GlideApp.with(PostDetailsActivity.this), photoUrl, authorImageView, DiskCacheStrategy.DATA);
     }
 
     @Override

@@ -5,6 +5,7 @@
     android:id="@+id/image_detail_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/ProjectTheme"
     tools:context="com.architectica.socialcomponents.main.imageDetail.ImageDetailActivity">
 
     <ProgressBar

@@ -17,6 +17,14 @@
 
 package com.architectica.socialcomponents;
 
+import com.architectica.socialcomponents.adapters.CustomEditThreadDetailsActivity;
+import com.architectica.socialcomponents.main.Chat.CustomChatActivity;
+import com.architectica.socialcomponents.main.main.Chats.CustomChatsFragment;
+import com.architectica.socialcomponents.main.main.MainActivity;
+
+import sdk.chat.app.firebase.ChatSDKFirebase;
+import sdk.chat.core.session.ChatSDK;
+
 public class Application extends android.app.Application {
 
     public static final String TAG = Application.class.getSimpleName();
@@ -25,7 +33,18 @@ public class Application extends android.app.Application {
     public void onCreate() {
         super.onCreate();
 
-        ApplicationHelper.initDatabaseHelper(this);
-     //   PostInteractor.getInstance(this).subscribeToNewPosts();
+        try {
+            ChatSDKFirebase.quickStart(this,"chatsdk","api key",true);
+            ChatSDK.ui().setMainActivity(MainActivity.class);
+            //ChatSDK.ui().setThreadDetailsActivity(CustomThreadDetailsActivity.class);
+            //ChatSDK.ui().setThreadEditDetailsActivity(CustomEditThreadDetailsActivity.class);
+            //ChatSDK.ui().setChatActivity(CustomChatActivity.class);
+            ChatSDK.ui().setPrivateThreadsFragment(new CustomChatsFragment());
+            ApplicationHelper.initDatabaseHelper(this);
+            // PostInteractor.getInstance(this).subscribeToNewPosts();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

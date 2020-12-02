@@ -6,6 +6,7 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/ProjectTheme"
     tools:context=".main.main.MainActivity">
 
     <LinearLayout
@@ -44,7 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:background="@color/primary"
+        android:background="@color/primary_project"
         app:itemIconTint="@drawable/bottom_navigation_selection"
         app:itemTextColor="@drawable/bottom_navigation_selection"
         design:menu="@menu/bottom_nav_menu"
@@ -58,6 +59,8 @@
         android:id="@+id/nav_view"
         app:headerLayout="@layout/nav_header_home"
         app:menu="@menu/activity_home_drawer"
-        android:layout_height="match_parent"></com.google.android.material.navigation.NavigationView>
+        android:layout_height="match_parent"
+        app:itemIconTint="@color/black"
+        app:itemTextColor="@color/black"></com.google.android.material.navigation.NavigationView>
 
 </androidx.drawerlayout.widget.DrawerLayout>

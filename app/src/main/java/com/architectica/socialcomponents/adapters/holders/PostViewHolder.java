@@ -32,27 +32,15 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.LinearLayout;
 
 import com.architectica.socialcomponents.main.Hashtags.HashtagPostsActivity;
 import com.architectica.socialcomponents.managers.DatabaseHelper;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.ui.PlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
+import com.bumptech.glide.RequestManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.architectica.socialcomponents.Constants;
@@ -69,7 +57,6 @@ import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.model.Profile;
 import com.architectica.socialcomponents.utils.FormatterUtil;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
 import com.google.firebase.storage.StorageReference;
 import com.hendraanggrian.appcompat.widget.SocialTextView;
 import com.hendraanggrian.appcompat.widget.SocialView;
@@ -83,13 +70,14 @@ import java.io.IOException;
 public class PostViewHolder extends RecyclerView.ViewHolder {
     public static final String TAG = PostViewHolder.class.getSimpleName();
 
+    public LinearLayout mediaContainer;
+    public RequestManager requestManager;
+    public ProgressBar progressBar;
     private LinearLayout countersLayout;
     protected Context context;
-    private ImageView postImageView;
-    private SimpleExoPlayer exoPlayer;
-    private PlayerView postVideoView;
-    private TextView titleTextView;
-    private SocialTextView detailsTextView;
+    public ImageView postImageView,volumeControl;
+    TextView titleTextView;
+    SocialTextView detailsTextView;
     private TextView likeCounterTextView,userName,userSkill;
     private ImageView likesImageView;
     private TextView commentsCountTextView;
@@ -113,8 +101,10 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         this.context = view.getContext();
         this.baseActivity = activity;
 
+        mediaContainer = view.findViewById(R.id.mediaContainer);
+        volumeControl = view.findViewById(R.id.volume_control);
+        progressBar = view.findViewById(R.id.progressBar);
         postImageView = view.findViewById(R.id.postImageView);
-        postVideoView = view.findViewById(R.id.postVideoView);
         userName=view.findViewById(R.id.user);
         userSkill=view.findViewById(R.id.userInfo);
         likeCounterTextView = view.findViewById(R.id.likeCounterTextView);
@@ -154,12 +144,12 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
         postManager = PostManager.getInstance(context.getApplicationContext());
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        view.setOnClickListener(v -> {
+        /*view.setOnClickListener(v -> {
             int position = getAdapterPosition();
             if (onClickListener != null && position != RecyclerView.NO_POSITION) {
                 onClickListener.onItemClick(getAdapterPosition(), v);
             }
-        });
+        });*/
 
         likeViewGroup.setOnClickListener(view1 -> {
             int position = getAdapterPosition();
@@ -181,11 +171,12 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
 
         if (post.getImageTitle().equals("")){
             postImageView.setVisibility(View.GONE);
-            postVideoView.setVisibility(View.GONE);
         }
         else {
 
-            if(post.getContentType() != null){
+            postManager.loadImageMediumSize(GlideApp.with(baseActivity), post.getImageTitle(), postImageView);
+
+            /*if(post.getContentType() != null){
 
                 if (post.getContentType().contains("video")){
 
@@ -201,7 +192,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
                     postVideoView.setVisibility(View.GONE);
 
                     postImageView.setVisibility(View.VISIBLE);
-                    postManager.loadImageMediumSize(GlideApp.with(baseActivity), post.getImageTitle(), postImageView);
+
 
                 }
 
@@ -213,7 +204,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
                 postImageView.setVisibility(View.VISIBLE);
                 postManager.loadImageMediumSize(GlideApp.with(baseActivity), post.getImageTitle(), postImageView);
 
-            }
+            }*/
 
         }
 
@@ -244,7 +235,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
 
     private void loadVideo(String imageTitle){
 
-        DatabaseHelper databaseHelper = DatabaseHelper.getInstance(context);
+        /*DatabaseHelper databaseHelper = DatabaseHelper.getInstance(context);
 
         StorageReference reference = databaseHelper.getOriginImageStorageRef(imageTitle);
 
@@ -283,7 +274,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
             public void onFailure(Exception e) {
                 Toast.makeText(context, "Video loading failed", Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
 
     }
 
@@ -320,7 +311,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
             public void onObjectChanged(Profile obj) {
                 if (obj != null && obj.getPhotoUrl() != null) {
                     if (!baseActivity.isFinishing() && !baseActivity.isDestroyed()) {
-                        ImageUtil.loadImage(GlideApp.with(baseActivity), obj.getPhotoUrl(), authorImageView);
+                        ProjectImageUtil.loadImage(GlideApp.with(baseActivity), obj.getPhotoUrl(), authorImageView);
                     }
                 }
             }

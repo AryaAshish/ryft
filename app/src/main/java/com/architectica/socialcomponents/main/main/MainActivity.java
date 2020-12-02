@@ -31,7 +31,6 @@ import androidx.annotation.RequiresApi;
 
 import com.architectica.socialcomponents.main.Rewards.RewardsActivity;
 import com.architectica.socialcomponents.main.login.LoginActivity;
-import com.architectica.socialcomponents.main.main.Chats.ChatsFragment;
 import com.architectica.socialcomponents.main.main.GoogleNews.GoogleNewsFragment;
 import com.architectica.socialcomponents.main.main.Profile.ProfileActivity;
 import com.architectica.socialcomponents.main.main.Projects.ProjectsFragment;
@@ -46,6 +45,8 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.widget.Toolbar;
+import io.reactivex.disposables.Disposable;
+import sdk.chat.core.session.ChatSDK;
 
 import android.util.Log;
 import android.view.MenuItem;
@@ -128,6 +129,9 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
         MenuItem selectedItem;
 
+        //selectedItem = mBottomNav.getMenu().getItem(0);
+
+
         if (savedInstanceState != null) {
 
             mSelectedItem = savedInstanceState.getInt(SELECTED_ITEM, 0);
@@ -192,14 +196,10 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
                 if (!currentVersion.equalsIgnoreCase(latestVersion)){
                     if(!isFinishing()){ //This would help to prevent Error : BinderProxy@45d459c0 is not valid; is your activity running? error
                         showUpdateDialog();
+                        return;
                     }
                 }
             }
-            /*else{
-
-                //startApp();
-
-            }*/
             super.onPostExecute(jsonObject);
         }
     }
@@ -212,7 +212,6 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
             public void onClick(DialogInterface dialog, int which) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
                         ("market://details?id=com.architectica.socialcomponents")));
-                dialog.dismiss();
             }
         });
 
@@ -226,14 +225,6 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
         builder.setCancelable(false);
         dialog = builder.show();
     }
-
-    /*private void startApp(){
-
-        MenuItem selectedItem = mBottomNav.getMenu().getItem(0);
-
-        selectFragment(selectedItem);
-
-    }*/
 
     private void selectFragment(MenuItem item) {
 
@@ -256,9 +247,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
 
             case R.id.menu_chats:
                 if (checkAuthorization()) {
-
-                    frag = ChatsFragment.newInstance();
-
+                    frag = ChatSDK.ui().privateThreadsFragment();
                 }
                 break;
 
@@ -314,11 +303,7 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
     @Override
     protected void onResumeFragments() {
         super.onResumeFragments();
-
-        MenuItem homeItem = mBottomNav.getMenu().getItem(0);
-
-        selectFragment(homeItem);
-
+        getCurrentVersion();
     }
 
     @NonNull
@@ -385,8 +370,13 @@ public class MainActivity extends BaseActivity<MainView, MainPresenter> implemen
             case R.id.nav_logout :
 
                 if (FirebaseAuth.getInstance().getCurrentUser() != null){
-                    LogoutHelper.logoutFirebase(MainActivity.this);
-                    LogoutHelper.logoutGoogle(GoogleApiHelper.createGoogleApiClient(MainActivity.this),MainActivity.this);
+                    Disposable d = ChatSDK.auth().logout().subscribe(() -> {
+                        LogoutHelper.logoutFirebase(MainActivity.this);
+                        LogoutHelper.logoutGoogle(GoogleApiHelper.createGoogleApiClient(MainActivity.this),MainActivity.this);
+                    }, throwable -> {
+                        Toast.makeText(this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+
                 }
 
                 break;

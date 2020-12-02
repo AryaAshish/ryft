@@ -8,20 +8,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.architectica.socialcomponents.R;
-import com.architectica.socialcomponents.main.Chat.ChatActivity;
-import com.architectica.socialcomponents.main.postDetails.ResponseActivity;
 import com.architectica.socialcomponents.main.postDetails.RewardsResponse;
 import com.architectica.socialcomponents.model.Profile;
-import com.architectica.socialcomponents.views.CircularImageView;
+import com.architectica.socialcomponents.views.ProjectCircularImageView;
 import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import static com.architectica.socialcomponents.main.postDetails.ProjectDetailsActivity.PROJECT_ID_EXTRA_KEY;
 import static com.architectica.socialcomponents.main.postDetails.RewardDetailsActivity.REWARD_ID_EXTRA_KEY;
 
 public class RewardsAppliedAdapter extends RecyclerView.Adapter<RewardsAppliedAdapter.PeopleAppliedViewHolder> {
@@ -80,13 +76,13 @@ public class RewardsAppliedAdapter extends RecyclerView.Adapter<RewardsAppliedAd
 
     public class PeopleAppliedViewHolder extends RecyclerView.ViewHolder {
 
-        public CircularImageView profileImage;
+        public ProjectCircularImageView profileImage;
         public TextView displayName;
 
         public PeopleAppliedViewHolder(View view) {
             super(view);
 
-            profileImage = (CircularImageView) view.findViewById(R.id.user_single_image);
+            profileImage = (ProjectCircularImageView) view.findViewById(R.id.user_single_image);
             displayName = (TextView) view.findViewById(R.id.user_single_name);
 
         }

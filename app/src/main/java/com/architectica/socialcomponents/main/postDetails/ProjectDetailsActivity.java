@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,9 +23,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.LinearLayout;
-import android.widget.VideoView;
-
-import java.util.HashMap;
 
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.adapters.CommentsAdapter;
@@ -34,10 +30,8 @@ import com.architectica.socialcomponents.controllers.LikeController;
 import com.architectica.socialcomponents.dialogs.EditCommentDialog;
 import com.architectica.socialcomponents.enums.PostStatus;
 import com.architectica.socialcomponents.main.base.BaseActivity;
-import com.architectica.socialcomponents.main.base.BaseView;
 import com.architectica.socialcomponents.main.imageDetail.ImageDetailActivity;
 import com.architectica.socialcomponents.main.login.LoginActivity;
-import com.architectica.socialcomponents.main.post.editPost.EditPostActivity;
 import com.architectica.socialcomponents.main.profile.ProfileActivity;
 import com.architectica.socialcomponents.managers.DatabaseHelper;
 import com.architectica.socialcomponents.managers.PostManager;
@@ -46,9 +40,8 @@ import com.architectica.socialcomponents.model.Comment;
 import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.utils.FormatterUtil;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.facebook.internal.LockOnGetVariable;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -71,6 +64,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -79,6 +73,11 @@ import androidx.appcompat.view.ActionMode;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import io.reactivex.disposables.Disposable;
+import sdk.chat.core.dao.User;
+import sdk.chat.core.interfaces.ThreadType;
+import sdk.chat.core.session.ChatSDK;
+import sdk.chat.ui.update.ThreadUpdateAction;
 
 public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, ProjectDetailsPresenter> implements ProjectDetailsView,EditCommentDialog.CommentDialogCallback  {
 
@@ -119,6 +118,7 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
     private MenuItem deleteActionMenuItem;
 
     private String postId;
+    private Post post;
 
     private PostManager postManager;
     private LikeController likeController;
@@ -143,7 +143,8 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
         postManager = PostManager.getInstance(this);
 
         isAuthorAnimationRequired = getIntent().getBooleanExtra(AUTHOR_ANIMATION_NEEDED_EXTRA_KEY, false);
-        postId = getIntent().getStringExtra(PROJECT_ID_EXTRA_KEY);
+        post = (Post) getIntent().getSerializableExtra(PROJECT_ID_EXTRA_KEY);
+        postId = post.getId();
 
         incrementWatchersCount();
 
@@ -389,13 +390,7 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
 
                     if (link.length() != 0){
 
-                        FirebaseDatabase.getInstance().getReference("projects/" + postId).child("githublink").setValue(link);
-
-                        FirebaseDatabase.getInstance().getReference("projects/" + postId).child("status").setValue("verified");
-
-                        Toast.makeText(ProjectDetailsActivity.this, "project status changed to verified", Toast.LENGTH_SHORT).show();
-
-                        applyNow.setText("PEOPLE APPLIED");
+                        initProjectChat(postId,link);
 
                     }
                     else {
@@ -481,6 +476,47 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
                     }
                 });
             }
+        });
+
+    }
+
+    private void initProjectChat(String projectId,String link){
+
+        if (ChatSDK.auth().isAuthenticated()){
+
+            String admin = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            String projectAuthor = post.getAuthorId();
+
+            ArrayList<User> users = new ArrayList<>();
+
+            User adminUser = ChatSDK.db().fetchUserWithEntityID(admin);
+            User authorUser = ChatSDK.db().fetchUserWithEntityID(projectAuthor);
+
+            users.add(adminUser);
+            users.add(authorUser);
+
+            createGroupChat(users,link);
+
+        }
+        else {
+            Toast.makeText(ProjectDetailsActivity.this, "chatsdk not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+    }
+
+    private void createGroupChat(ArrayList<User> users,String link){
+
+        Disposable d = ChatSDK.thread().createThread(post.getTitle(), users, ThreadType.PrivateGroup, postId, post.getImageTitle()).subscribe(thread -> {
+
+            FirebaseDatabase.getInstance().getReference("projects/" + postId).child("githublink").setValue(link);
+
+            FirebaseDatabase.getInstance().getReference("projects/" + postId).child("status").setValue("verified");
+
+            Toast.makeText(ProjectDetailsActivity.this, "project status changed to verified", Toast.LENGTH_SHORT).show();
+
+            applyNow.setText("PEOPLE APPLIED");
+
         });
 
     }
@@ -763,7 +799,7 @@ public class ProjectDetailsActivity extends BaseActivity<ProjectDetailsView, Pro
 
     @Override
     public void loadAuthorPhoto(String photoUrl) {
-        ImageUtil.loadImage(GlideApp.with(ProjectDetailsActivity.this), photoUrl, authorImageView, DiskCacheStrategy.DATA);
+        ProjectImageUtil.loadImage(GlideApp.with(ProjectDetailsActivity.this), photoUrl, authorImageView, DiskCacheStrategy.DATA);
     }
 
     @Override

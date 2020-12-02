@@ -20,7 +20,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import androidx.annotation.Nullable;
-import android.util.Log;
+
 import android.widget.ImageView;
 
 import com.architectica.socialcomponents.model.Project;
@@ -249,13 +249,13 @@ public class PostManager extends FirebaseListenersManager {
     }
 
     public void loadImageMediumSize(GlideRequests request, String imageTitle, ImageView imageView, @Nullable OnImageRequestListener onImageRequestListener) {
-        int width = Utils.getDisplayWidth(context);
+        int width = ProjectUtils.getDisplayWidth(context);
         int height = (int) context.getResources().getDimension(R.dimen.post_detail_image_height);
 
         StorageReference mediumStorageRef = getMediumImageStorageRef(imageTitle);
         StorageReference originalStorageRef = getOriginImageStorageRef(imageTitle);
 
-        ImageUtil.loadMediumImageCenterCrop(request, mediumStorageRef, originalStorageRef, imageView, width, height, new RequestListener<Drawable>() {
+        ProjectImageUtil.loadMediumImageCenterCrop(request, mediumStorageRef, originalStorageRef, imageView, width, height, new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 if (onImageRequestListener != null) {
@@ -279,7 +279,7 @@ public class PostManager extends FirebaseListenersManager {
         loadImageMediumSize(request, imageTitle, imageView, null);
     }
 
-    private StorageReference getMediumImageStorageRef(String imageTitle) {
+    public StorageReference getMediumImageStorageRef(String imageTitle) {
         return postInteractor.getMediumImageStorageRef(imageTitle);
     }
 

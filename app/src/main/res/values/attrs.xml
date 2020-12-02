@@ -8,7 +8,7 @@
         <attr name="collapseText" format="string" />
     </declare-styleable>
 
-    <declare-styleable name="CircularImageView">
+    <declare-styleable name="ProjectCircularImageView">
         <attr name="border" format="boolean" />
         <attr name="border_width" format="dimension" />
         <attr name="border_color" format="color" />

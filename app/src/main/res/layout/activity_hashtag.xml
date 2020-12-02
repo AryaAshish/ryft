@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="false"
-    tools:context=".main.Hashtags.HashtagActivity">
+    android:theme="@style/ProjectTheme">
 
     <ProgressBar
         android:id="@+id/progressBar"

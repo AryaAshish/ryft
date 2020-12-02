@@ -5,15 +5,11 @@ import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,32 +19,22 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.LinearLayout;
-import android.widget.VideoView;
 
 import java.util.HashMap;
 
 import com.architectica.socialcomponents.R;
-import com.architectica.socialcomponents.adapters.CommentsAdapter;
-import com.architectica.socialcomponents.controllers.LikeController;
-import com.architectica.socialcomponents.dialogs.EditCommentDialog;
 import com.architectica.socialcomponents.enums.PostStatus;
 import com.architectica.socialcomponents.main.base.BaseActivity;
-import com.architectica.socialcomponents.main.base.BaseView;
 import com.architectica.socialcomponents.main.imageDetail.ImageDetailActivity;
 import com.architectica.socialcomponents.main.login.LoginActivity;
 import com.architectica.socialcomponents.main.post.editPost.EditPostActivity;
 import com.architectica.socialcomponents.main.profile.ProfileActivity;
 import com.architectica.socialcomponents.managers.DatabaseHelper;
 import com.architectica.socialcomponents.managers.PostManager;
-import com.architectica.socialcomponents.managers.ProfileManager;
-import com.architectica.socialcomponents.model.Comment;
 import com.architectica.socialcomponents.model.Post;
-import com.architectica.socialcomponents.utils.FormatterUtil;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.facebook.internal.LockOnGetVariable;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -71,14 +57,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.ActionMode;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class RewardDetailsActivity extends BaseActivity<RewardDetailsView, RewardDetailsPresenter> implements RewardDetailsView{
 
@@ -645,7 +626,7 @@ public class RewardDetailsActivity extends BaseActivity<RewardDetailsView, Rewar
 
     @Override
     public void loadAuthorPhoto(String photoUrl) {
-        ImageUtil.loadImage(GlideApp.with(RewardDetailsActivity.this), photoUrl, authorImageView, DiskCacheStrategy.DATA);
+        ProjectImageUtil.loadImage(GlideApp.with(RewardDetailsActivity.this), photoUrl, authorImageView, DiskCacheStrategy.DATA);
     }
 
     @Override

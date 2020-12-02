@@ -8,12 +8,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.architectica.socialcomponents.R;
-import com.architectica.socialcomponents.main.Chat.ChatActivity;
 import com.architectica.socialcomponents.main.postDetails.ResponseActivity;
 import com.architectica.socialcomponents.model.Profile;
-import com.architectica.socialcomponents.views.CircularImageView;
+import com.architectica.socialcomponents.views.ProjectCircularImageView;
 import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -78,13 +76,13 @@ public class PeopleAppliedAdapter extends RecyclerView.Adapter<PeopleAppliedAdap
 
     public class PeopleAppliedViewHolder extends RecyclerView.ViewHolder {
 
-        public CircularImageView profileImage;
+        public ProjectCircularImageView profileImage;
         public TextView displayName;
 
         public PeopleAppliedViewHolder(View view) {
             super(view);
 
-            profileImage = (CircularImageView) view.findViewById(R.id.user_single_image);
+            profileImage = (ProjectCircularImageView) view.findViewById(R.id.user_single_image);
             displayName = (TextView) view.findViewById(R.id.user_single_name);
 
         }

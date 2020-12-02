@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="false"
-    tools:context=".main.usersList.UsersListActivity">
+    tools:context=".main.usersList.UsersListActivity"
+    android:theme="@style/ProjectTheme">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"

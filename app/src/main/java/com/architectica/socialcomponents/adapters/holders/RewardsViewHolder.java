@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
@@ -36,6 +35,7 @@ import android.widget.Toast;
 import android.widget.LinearLayout;
 
 import com.architectica.socialcomponents.managers.DatabaseHelper;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -67,7 +67,6 @@ import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.model.Profile;
 import com.architectica.socialcomponents.utils.FormatterUtil;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
 import com.google.firebase.storage.StorageReference;
 import com.hendraanggrian.appcompat.widget.SocialTextView;
 import com.hendraanggrian.appcompat.widget.SocialView;
@@ -317,7 +316,7 @@ public class RewardsViewHolder extends RecyclerView.ViewHolder {
             public void onObjectChanged(Profile obj) {
                 if (obj != null && obj.getPhotoUrl() != null) {
                     if (!baseActivity.isFinishing() && !baseActivity.isDestroyed()) {
-                        ImageUtil.loadImage(GlideApp.with(baseActivity), obj.getPhotoUrl(), authorImageView);
+                        ProjectImageUtil.loadImage(GlideApp.with(baseActivity), obj.getPhotoUrl(), authorImageView);
                     }
                 }
             }

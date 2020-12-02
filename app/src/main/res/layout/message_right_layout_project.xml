@@ -1,31 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/message_single_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_alignParentEnd="true"
     android:padding="10dp"
-    android:weightSum="10">
+    android:weightSum="10"
+    android:theme="@style/ProjectTheme">
 
-    <com.architectica.socialcomponents.views.CircularImageView
+    <com.architectica.socialcomponents.views.ProjectCircularImageView
         android:id="@+id/message_profile_layout"
         android:layout_width="36dp"
         android:layout_height="36dp"
+        android:layout_alignParentEnd="true"
         android:layout_weight="0"
-        android:src="@drawable/default_avatar" />
+        android:src="@drawable/default_avatar"
+        android:visibility="gone" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
         android:layout_marginLeft="10dp"
-        android:layout_toEndOf="@+id/message_profile_layout"
-        android:background="@drawable/messege_left"
+        android:background="@drawable/messege_right"
         android:orientation="vertical"
-        android:paddingLeft="28dp"
+        android:paddingLeft="20dp"
         android:paddingTop="4dp"
         android:paddingRight="28dp"
-        android:paddingBottom="10dp">
+        android:paddingBottom="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="wrap"
+        app:layout_constraintWidth_percent="0.8">
 
         <TextView
             android:id="@+id/name_text_layout"
@@ -37,16 +45,17 @@
             android:text="Display Name"
             android:textColor="@color/white"
             android:textSize="15sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/message_text_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/name_text_layout"
+            android:layout_toEndOf="@+id/message_profile_layout"
             android:lineSpacingExtra="2dp"
             android:maxWidth="200dp"
-            android:padding="0dp"
             android:text="Message Text"
             android:visibility="gone"
             android:textColor="@color/whiteTransparent"
@@ -57,11 +66,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/name_text_layout"
+            android:layout_toEndOf="@+id/message_profile_layout"
             android:lineSpacingExtra="2dp"
             android:maxWidth="200dp"
-            android:padding="0dp"
             android:text="Download File"
-            android:visibility="gone"
             android:textColor="@color/whiteTransparent"
             android:textSize="14sp" />
 
@@ -78,5 +86,4 @@
             android:padding="0dp"
             android:scaleType="centerCrop" />
     </LinearLayout>
-
 </RelativeLayout>

@@ -16,6 +16,8 @@
 
 package com.architectica.socialcomponents.adapters;
 
+import android.util.Log;
+
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.architectica.socialcomponents.main.base.BaseActivity;
@@ -30,6 +32,10 @@ import java.util.List;
 
 public abstract class BaseProjectsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final String TAG = BasePostsAdapter.class.getSimpleName();
+
+    public static int TYPE_TEXT = 0;
+    public static int TYPE_IMAGE = 1;
+    public static int TYPE_VIDEO = 2;
 
     protected List<Post> postList = new LinkedList<>();
     protected BaseActivity activity;
@@ -50,7 +56,24 @@ public abstract class BaseProjectsAdapter extends RecyclerView.Adapter<RecyclerV
 
     @Override
     public int getItemViewType(int position) {
-        return postList.get(position).getItemType().getTypeCode();
+
+        //Log.i("debugging","" + postList.get(position).getId() + postList.get(position).getTitle());
+
+        /*if (postList.get(position).getImageTitle() == null){
+            return TYPE_TEXT;
+        }*/
+
+        if (postList.get(position).getImageTitle().equals("")){
+            return TYPE_TEXT;
+        }
+
+        if(postList.get(position).getContentType() != null){
+            if (postList.get(position).getContentType().contains("video")){
+                return TYPE_VIDEO;
+            }
+        }
+
+        return TYPE_IMAGE;
     }
 
     protected Post getItemByPosition(int position) {

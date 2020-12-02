@@ -3,20 +3,14 @@ package com.architectica.socialcomponents.main.postDetails;
 import android.os.Bundle;
 
 import com.architectica.socialcomponents.R;
-import com.architectica.socialcomponents.adapters.ChatsListAdapter;
 import com.architectica.socialcomponents.adapters.PeopleAppliedAdapter;
 import com.architectica.socialcomponents.model.Profile;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import androidx.annotation.NonNull;

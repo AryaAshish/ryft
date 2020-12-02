@@ -24,9 +24,10 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:padding="24dp"
-    android:gravity="center_horizontal">
+    android:gravity="center_horizontal"
+    android:theme="@style/ProjectTheme">
 
-    <com.architectica.socialcomponents.views.CircularImageView
+    <com.architectica.socialcomponents.views.ProjectCircularImageView
         android:id="@+id/imageView"
         android:layout_width="@dimen/profile_screen_avatar_size"
         android:layout_height="@dimen/profile_screen_avatar_size"

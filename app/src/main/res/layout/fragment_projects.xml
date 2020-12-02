@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="false"
-    tools:context=".main.main.MainActivity">
+    tools:context=".main.main.MainActivity"
+    android:theme="@style/ProjectTheme">
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -26,12 +27,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <androidx.recyclerview.widget.RecyclerView
+            <im.ene.toro.widget.Container
                 android:id="@+id/recycler_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:divider="@null"
-                android:paddingBottom="@dimen/intrinsic_padding" />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:padding="8dp"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         </com.architectica.socialcomponents.views.SwipeRefreshPreLollyPop>
 
@@ -55,7 +57,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/large_intrinsic_padding"
         android:clickable="true"
-        android:backgroundTint="@color/AppTheme"
         android:src="@drawable/ic_add_white_48dp"
         android:layout_gravity="bottom|right" />
 

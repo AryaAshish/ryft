@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:focusableInTouchMode="true"
+    android:theme="@style/ProjectTheme">
 
     <ScrollView
         android:id="@+id/scrollView"
@@ -26,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <com.architectica.socialcomponents.views.CircularImageView
+                <com.architectica.socialcomponents.views.ProjectCircularImageView
                     android:id="@+id/authorImageView"
                     android:layout_width="@dimen/post_author_image_side"
                     android:layout_height="@dimen/post_author_image_side"
@@ -196,7 +197,7 @@
                     android:minWidth="150dp"
                     android:paddingLeft="@dimen/large_intrinsic_padding"
                     android:paddingRight="@dimen/large_intrinsic_padding"
-                    android:text="VIEW IN GITHUB"
+                    android:text="TAKE TEST"
                     android:visibility="gone"
                     android:textColor="@android:color/white" />
 

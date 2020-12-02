@@ -32,9 +32,9 @@ import com.architectica.socialcomponents.enums.UploadImagePrefix;
 import java.util.Date;
 
 
-public class ImageUtil {
+public class ProjectImageUtil {
 
-    public static final String TAG = ImageUtil.class.getSimpleName();
+    public static final String TAG = ProjectImageUtil.class.getSimpleName();
 
     public static String generateImageTitle(UploadImagePrefix prefix, String parentId) {
         if (parentId != null) {

@@ -26,13 +26,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.main.base.BaseActivity;
 import com.architectica.socialcomponents.managers.PostManager;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
 import com.architectica.socialcomponents.views.TouchImageView;
 
 public class ImageDetailActivity extends BaseActivity<ImageDetailView, ImageDetailPresenter> implements ImageDetailView {
@@ -111,7 +111,7 @@ public class ImageDetailActivity extends BaseActivity<ImageDetailView, ImageDeta
         }
         else {
 
-            ImageUtil.loadImageWithSimpleTarget(GlideApp.with(this),
+            ProjectImageUtil.loadImageWithSimpleTarget(GlideApp.with(this),
                     PostManager.getInstance(this.getApplicationContext()).getOriginImageStorageRef(imageTitle),
                     new SimpleTarget<Bitmap>(maxImageSide, maxImageSide) {
                         @Override

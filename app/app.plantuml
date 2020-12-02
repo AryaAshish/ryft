@@ -44,7 +44,7 @@ title __APP's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace adapters {
-      class com.architectica.socialcomponents.adapters.ChatsListAdapter {
+      class com.architectica.socialcomponents.adapters.ProjectChatsListAdapter {
       }
     }
   }
@@ -68,7 +68,7 @@ title __APP's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace adapters {
-      class com.architectica.socialcomponents.adapters.MessageAdapter {
+      class com.architectica.socialcomponents.adapters.ProjectMessageAdapter {
       }
     }
   }
@@ -290,7 +290,7 @@ title __APP's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace main.Chat {
-      class com.architectica.socialcomponents.main.Chat.ChatActivity {
+      class com.architectica.socialcomponents.main.Chat.ProjectChatActivity {
       }
     }
   }
@@ -1138,7 +1138,7 @@ title __APP's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace model {
-      class com.architectica.socialcomponents.model.Messages {
+      class com.architectica.socialcomponents.model.ProjectMessages {
       }
     }
   }
@@ -1266,7 +1266,7 @@ title __APP's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace utils {
-      class com.architectica.socialcomponents.utils.ImageUtil {
+      class com.architectica.socialcomponents.utils.ProjectImageUtil {
       }
     }
   }
@@ -1314,7 +1314,7 @@ title __APP's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace utils {
-      class com.architectica.socialcomponents.utils.Utils {
+      class com.architectica.socialcomponents.utils.ProjectUtils {
       }
     }
   }
@@ -1381,17 +1381,17 @@ title __APP's Class Diagram__\n
   
 
   com.architectica.socialcomponents.AllUsersList.UsersActivity -up-|> android.support.v7.app.AppCompatActivity
-  com.architectica.socialcomponents.AllUsersList.UsersActivity o-- com.architectica.socialcomponents.adapters.ChatsListAdapter : adapter
+  com.architectica.socialcomponents.AllUsersList.UsersActivity o-- com.architectica.socialcomponents.adapters.ProjectChatsListAdapter : adapter
   com.architectica.socialcomponents.Application -up-|> android.app.Application
   com.architectica.socialcomponents.adapters.BasePostsAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
   com.architectica.socialcomponents.adapters.BasePostsAdapter o-- com.architectica.socialcomponents.main.base.BaseActivity : activity
-  com.architectica.socialcomponents.adapters.ChatsListAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
+  com.architectica.socialcomponents.adapters.ProjectChatsListAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
   com.architectica.socialcomponents.adapters.CommentsAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
   com.architectica.socialcomponents.adapters.CommentsAdapter o-- com.architectica.socialcomponents.adapters.CommentsAdapter.Callback : callback
   com.architectica.socialcomponents.adapters.FollowPostsAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
   com.architectica.socialcomponents.adapters.FollowPostsAdapter o-- com.architectica.socialcomponents.main.base.BaseActivity : activity
   com.architectica.socialcomponents.adapters.FollowPostsAdapter o-- com.architectica.socialcomponents.adapters.FollowPostsAdapter.CallBack : callBack
-  com.architectica.socialcomponents.adapters.MessageAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
+  com.architectica.socialcomponents.adapters.ProjectMessageAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
   com.architectica.socialcomponents.adapters.NewsAdapter -up-|> android.support.v7.widget.RecyclerView.Adapter
   com.architectica.socialcomponents.adapters.NotificationsAdapter -up-|> com.architectica.socialcomponents.adapters.BasePostsAdapter
   com.architectica.socialcomponents.adapters.NotificationsAdapter o-- com.architectica.socialcomponents.adapters.NotificationsAdapter.Callback : callback
@@ -1430,11 +1430,11 @@ title __APP's Class Diagram__\n
   com.architectica.socialcomponents.dialogs.UnfollowConfirmationDialog o-- com.architectica.socialcomponents.dialogs.UnfollowConfirmationDialog.Callback : callback
   com.architectica.socialcomponents.dialogs.UnfollowConfirmationDialog o-- com.architectica.socialcomponents.model.Profile : profile
   com.architectica.socialcomponents.listeners.CustomTransitionListener .up.|> android.transition.Transition.TransitionListener
-  com.architectica.socialcomponents.main.Chat.ChatActivity -up-|> android.support.v7.app.AppCompatActivity
-  com.architectica.socialcomponents.main.Chat.ChatActivity o-- com.architectica.socialcomponents.adapters.MessageAdapter : mAdapter
-  com.architectica.socialcomponents.main.Chat.ChatActivity o-- com.architectica.socialcomponents.views.CircularImageView : mProfileImage
+  com.architectica.socialcomponents.main.Chat.ProjectChatActivity -up-|> android.support.v7.app.AppCompatActivity
+  com.architectica.socialcomponents.main.Chat.ProjectChatActivity o-- com.architectica.socialcomponents.adapters.ProjectMessageAdapter : mAdapter
+  com.architectica.socialcomponents.main.Chat.ProjectChatActivity o-- com.architectica.socialcomponents.views.CircularImageView : mProfileImage
   com.architectica.socialcomponents.main.ChatsList.ChatsListActivity -up-|> android.support.v7.app.AppCompatActivity
-  com.architectica.socialcomponents.main.ChatsList.ChatsListActivity o-- com.architectica.socialcomponents.adapters.ChatsListAdapter : adapter
+  com.architectica.socialcomponents.main.ChatsList.ChatsListActivity o-- com.architectica.socialcomponents.adapters.ProjectChatsListAdapter : adapter
   com.architectica.socialcomponents.main.News.GoogleNewsActivity -up-|> android.support.v7.app.AppCompatActivity
   com.architectica.socialcomponents.main.News.GoogleNewsActivity o-- com.architectica.socialcomponents.adapters.NewsAdapter : newsAdapter
   com.architectica.socialcomponents.main.base.BaseActivity .up.|> com.architectica.socialcomponents.main.base.BaseView

@@ -3,9 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:selectableItemBackground">
+    android:background="?android:selectableItemBackground"
+    android:theme="@style/ProjectTheme">
 
-    <com.architectica.socialcomponents.views.CircularImageView
+    <com.architectica.socialcomponents.views.ProjectCircularImageView
         android:id="@+id/user_single_image"
         android:layout_width="64dp"
         android:layout_height="64dp"

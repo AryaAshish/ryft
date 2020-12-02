@@ -17,6 +17,7 @@
 package com.architectica.socialcomponents.main.profile;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -31,6 +32,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
+import io.reactivex.disposables.Disposable;
+import sdk.chat.core.dao.Thread;
+import sdk.chat.core.dao.User;
+import sdk.chat.core.interfaces.ThreadType;
+import sdk.chat.core.interfaces.UserListItem;
+import sdk.chat.core.session.ChatSDK;
+import sdk.guru.common.RX;
 
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -47,12 +55,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.architectica.socialcomponents.ApplicationHelper;
-import com.architectica.socialcomponents.main.Chat.ChatActivity;
 import com.architectica.socialcomponents.main.main.Profile.PostsByUserFragment;
 import com.architectica.socialcomponents.main.main.Profile.ProjectsByUserFragment;
+import com.architectica.socialcomponents.main.postDetails.ProjectDetailsActivity;
 import com.architectica.socialcomponents.managers.DatabaseHelper;
+import com.architectica.socialcomponents.utils.GoogleApiHelper;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -79,13 +89,14 @@ import com.architectica.socialcomponents.managers.ProfileManager;
 import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.model.Profile;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.architectica.socialcomponents.utils.LogUtil;
 import com.architectica.socialcomponents.utils.LogoutHelper;
 import com.architectica.socialcomponents.views.FollowButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -130,7 +141,7 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.activity_profile_project);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
@@ -188,11 +199,25 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
         meesagePro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent chatIntent = new Intent(getApplicationContext(), ChatActivity.class);
+                /*Intent chatIntent = new Intent(getApplicationContext(), ChatActivity.class);
                 chatIntent.putExtra("ChatType","NormalChat");
                 chatIntent.putExtra("ChatUser",userID);
                 chatIntent.putExtra("UserName",nameEditText.getText().toString());
-                startActivity(chatIntent);
+                startActivity(chatIntent);*/
+                Log.i("debugging","clicked");
+                initPrivateChat();
+
+                /*if (ChatSDK.auth().isAuthenticated()){
+
+                    //String name = nameEditText.getText().toString();
+                    //getUserWithEntityID(userID,name);
+
+
+                }
+                else {
+                    Toast.makeText(ProfileActivity.this, "chatsdk not authenticated", Toast.LENGTH_SHORT).show();
+                }*/
+
             }
         });
 
@@ -225,7 +250,68 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
         //loadPostsList();
         supportPostponeEnterTransition();
 
+    }
 
+    private void initPrivateChat(){
+
+        if (ChatSDK.auth().isAuthenticated()){
+
+            Log.i("debugging","p1");
+
+            List<UserListItem> users = new ArrayList<>();
+
+            User chatUser = ChatSDK.db().fetchOrCreateEntityWithEntityID(User.class,userID);
+
+            Disposable d = ChatSDK.core().userOn(chatUser).subscribe(() -> {
+                // User object has now been populated and type ready to use
+                User currentUser = ChatSDK.currentUser();
+
+                Log.i("debugging","" + chatUser);
+                Log.i("debugging","" + currentUser);
+
+                users.add(currentUser);
+                users.add(chatUser);
+
+                createAndOpenThread("", users);
+            }, throwable -> {
+                Log.i("throwable",throwable.getMessage());
+                Toast.makeText(this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+
+        }
+        else {
+            Toast.makeText(ProfileActivity.this, "chatsdk not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+    }
+
+    private void createAndOpenThread(String name,List<UserListItem> users){
+
+        Disposable d = ChatSDK.thread().createThread(name,User.convertIfPossible(users),ThreadType.Private1to1)
+                .observeOn(RX.main())
+                .doFinally(() -> {
+                    // Runs when process completed from error or success
+                })
+                .subscribe(thread -> {
+                    // When the thread type created
+                    openChatActivityWithThread(this,thread);
+                }, throwable -> {
+                    // If there type an error
+                    Log.i("debugging",throwable.getMessage());
+                    Toast.makeText(this, throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+    }
+
+    public void openChatActivityWithThread (Context context, Thread thread) {
+        try {
+            Log.i("debugging","p4");
+            ChatSDK.ui().startChatActivityForID(context, thread.getEntityID());
+        }
+        catch (Exception e){
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -443,7 +529,7 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
         if (recyclerView == null) {
 
             recyclerView = findViewById(R.id.recycler_view);
-            postsAdapter = new PostsByUserAdapter(this, userID);
+            postsAdapter = new PostsByUserAdapter(ProfileActivity.this, userID);
             postsAdapter.setCallBack(new PostsByUserAdapter.CallBack() {
                 @Override
                 public void onItemClick(final Post post, final View view) {
@@ -575,7 +661,7 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
 
     @Override
     public void setProfilePhoto(String photoUrl) {
-        ImageUtil.loadImage(GlideApp.with(this), photoUrl, imageView, new RequestListener<Drawable>() {
+        ProjectImageUtil.loadImage(GlideApp.with(this), photoUrl, imageView, new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 scheduleStartPostponedTransition(imageView);
@@ -693,8 +779,12 @@ public class ProfileActivity extends BaseActivity<ProfileView, ProfilePresenter>
                 presenter.onEditProfileClick();
                 return true;
             case R.id.signOut:
-                LogoutHelper.signOut(mGoogleApiClient, this);
-                startMainActivity();
+                Disposable d = ChatSDK.auth().logout().subscribe(() -> {
+                    LogoutHelper.signOut(mGoogleApiClient, this);
+                    startMainActivity();
+                }, throwable -> {
+                    Toast.makeText(this, "" + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                });
                 return true;
             case R.id.createPost:
                 presenter.onCreatePostClick();

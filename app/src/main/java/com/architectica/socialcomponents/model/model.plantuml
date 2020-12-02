@@ -125,7 +125,7 @@ title __MODEL's Class Diagram__\n
 
   namespace com.architectica.socialcomponents {
     namespace model {
-      class com.architectica.socialcomponents.model.Messages {
+      class com.architectica.socialcomponents.model.ProjectMessages {
           - from : String
           - message : String
           - type : String

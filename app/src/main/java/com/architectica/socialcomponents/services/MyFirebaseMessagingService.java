@@ -26,11 +26,14 @@ import android.graphics.Bitmap;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
+import com.architectica.socialcomponents.main.interactors.ProfileInteractor;
 import com.architectica.socialcomponents.main.postDetails.ProjectDetailsActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,7 +45,7 @@ import com.architectica.socialcomponents.main.main.MainActivity;
 import com.architectica.socialcomponents.main.postDetails.PostDetailsActivity;
 import com.architectica.socialcomponents.managers.PostManager;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.architectica.socialcomponents.utils.LogUtil;
 
 import static android.os.Build.ID;
@@ -83,6 +86,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else {
             LogUtil.logError(TAG, "onMessageReceived()", new RuntimeException("FCM remoteMessage doesn't contains Action Type"));
         }
+    }
+
+    @Override
+    public void onNewToken(@NonNull String s) {
+        // If you want to send messages to this application instance or
+        // manage this apps subscriptions on the server side, send the
+        // Instance ID token to your app server.
+        sendRegistrationToServer(s);
+    }
+
+    private void sendRegistrationToServer(String token) {
+        ProfileInteractor.getInstance(getApplicationContext()).updateRegistrationToken(token);
     }
 
     private void handleRemoteMessage(RemoteMessage remoteMessage) {
@@ -225,7 +240,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     @Nullable
     public Bitmap getBitmapFromUrl(String imageUrl) {
-        return ImageUtil.loadBitmap(GlideApp.with(this), imageUrl, Constants.PushNotification.LARGE_ICONE_SIZE, Constants.PushNotification.LARGE_ICONE_SIZE);
+        return ProjectImageUtil.loadBitmap(GlideApp.with(this), imageUrl, Constants.PushNotification.LARGE_ICONE_SIZE, Constants.PushNotification.LARGE_ICONE_SIZE);
     }
 
     private void sendNotification(Channel channel, String notificationTitle, String notificationBody, Bitmap bitmap, Intent intent) {

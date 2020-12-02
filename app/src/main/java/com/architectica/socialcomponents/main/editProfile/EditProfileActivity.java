@@ -28,7 +28,6 @@ import androidx.annotation.Nullable;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -43,7 +42,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.architectica.socialcomponents.views.CircularImageView;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
+import com.architectica.socialcomponents.views.ProjectCircularImageView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -51,7 +51,6 @@ import com.bumptech.glide.request.target.Target;
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.main.pickImageBase.PickImageActivity;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
@@ -69,7 +68,7 @@ public class EditProfileActivity<V extends EditProfileView, P extends EditProfil
     private EditText nameEditText,uriEditText,bioEditText,phoneNumberEditText,mEditTextSixDigitCode;
     Button verify,verifyPhone,browseUrl;
     private AutoCompleteTextView usertype1,skillEditText,startUpTypeEditText;
-    protected CircularImageView imageView;
+    protected ProjectCircularImageView imageView;
     private ProgressBar avatarProgressBar;
     public String[] userTypes = {"Startup","Intern","Others"};
     public String[] skillTypes = {"Android Development(Java)","Android Development(Kotlin)","Web Development(MEAN Stack)","Web Development(MARN Stack)","Web Development","Business Development","Content Writing","Campus Ambassadors","IOS Development","Hybrid App Development"};
@@ -414,7 +413,7 @@ public class EditProfileActivity<V extends EditProfileView, P extends EditProfil
         //Log.i("url",photoUrl);
 
         //imageUri = Uri.parse(photoUrl);
-        ImageUtil.loadImage(GlideApp.with(this), photoUrl, imageView, new RequestListener<Drawable>() {
+        ProjectImageUtil.loadImage(GlideApp.with(this), photoUrl, imageView, new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                 avatarProgressBar.setVisibility(View.GONE);

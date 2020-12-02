@@ -1,12 +1,20 @@
 package com.architectica.socialcomponents.adapters;
 
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.architectica.socialcomponents.R;
 import com.architectica.socialcomponents.adapters.holders.LoadViewHolder;
+import com.architectica.socialcomponents.adapters.holders.PostImageViewHolder;
+import com.architectica.socialcomponents.adapters.holders.PostTextViewHolder;
+import com.architectica.socialcomponents.adapters.holders.PostVideoViewHolder;
 import com.architectica.socialcomponents.adapters.holders.PostViewHolder;
+import com.architectica.socialcomponents.adapters.holders.ProjectsImageViewHolder;
+import com.architectica.socialcomponents.adapters.holders.ProjectsTextViewHolder;
+import com.architectica.socialcomponents.adapters.holders.ProjectsVideoViewHolder;
 import com.architectica.socialcomponents.adapters.holders.ProjectsViewHolder;
 import com.architectica.socialcomponents.controllers.LikeController;
 import com.architectica.socialcomponents.enums.ItemType;
@@ -16,11 +24,13 @@ import com.architectica.socialcomponents.managers.listeners.OnPostListChangedLis
 import com.architectica.socialcomponents.model.Post;
 import com.architectica.socialcomponents.model.PostListResult;
 import com.architectica.socialcomponents.utils.PreferencesUtil;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
@@ -73,16 +83,26 @@ public class ProjectsAdapter extends BaseProjectsAdapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        if (viewType == ItemType.ITEM.getTypeCode()) {
-            return new ProjectsViewHolder(inflater.inflate(R.layout.post_item_list_view, parent, false),
-                    createOnClickListener(), activity);
-        } else {
+        if (viewType == TYPE_TEXT){
+            return new ProjectsTextViewHolder(inflater.inflate(R.layout.text_post_list_item, parent, false),
+                    createTextOnClickListener(), activity);
+        }
+        else if (viewType == TYPE_VIDEO){
+            return new ProjectsVideoViewHolder(inflater.inflate(R.layout.video_post_list_item, parent, false),
+                    createVideoOnClickListener(), activity);
+        }
+        else if (viewType == TYPE_IMAGE){
+            return new ProjectsImageViewHolder(inflater.inflate(R.layout.image_post_list_item, parent, false),
+                    createImageOnClickListener(), activity);
+        }
+        else {
             return new LoadViewHolder(inflater.inflate(R.layout.loading_view, parent, false));
         }
     }
 
-    private ProjectsViewHolder.OnClickListener createOnClickListener() {
-        return new ProjectsViewHolder.OnClickListener() {
+    private ProjectsTextViewHolder.OnClickListener createTextOnClickListener(){
+
+        return new ProjectsTextViewHolder.OnClickListener() {
             @Override
             public void onItemClick(int position, View view) {
                 if (callback != null) {
@@ -94,7 +114,7 @@ public class ProjectsAdapter extends BaseProjectsAdapter {
             @Override
             public void onLikeClick(LikeController likeController, int position) {
                 Post post = getItemByPosition(position);
-                likeController.handleProjectLikeClickAction(activity, post);
+                likeController.handleLikeClickAction(activity, post);
             }
 
             @Override
@@ -104,6 +124,61 @@ public class ProjectsAdapter extends BaseProjectsAdapter {
                 }
             }
         };
+
+    }
+
+    private ProjectsImageViewHolder.OnClickListener createImageOnClickListener(){
+
+        return new ProjectsImageViewHolder.OnClickListener() {
+            @Override
+            public void onItemClick(int position, View view) {
+                if (callback != null) {
+                    selectedPostPosition = position;
+                    callback.onItemClick(getItemByPosition(position), view);
+                }
+            }
+
+            @Override
+            public void onLikeClick(LikeController likeController, int position) {
+                Post post = getItemByPosition(position);
+                likeController.handleLikeClickAction(activity, post);
+            }
+
+            @Override
+            public void onAuthorClick(int position, View view) {
+                if (callback != null) {
+                    callback.onAuthorClick(getItemByPosition(position).getAuthorId(), view);
+                }
+            }
+        };
+
+    }
+
+    private ProjectsVideoViewHolder.OnClickListener createVideoOnClickListener(){
+
+        return new ProjectsVideoViewHolder.OnClickListener() {
+            @Override
+            public void onItemClick(int position, View view) {
+                if (callback != null) {
+                    selectedPostPosition = position;
+                    callback.onItemClick(getItemByPosition(position), view);
+                }
+            }
+
+            @Override
+            public void onLikeClick(LikeController likeController, int position) {
+                Post post = getItemByPosition(position);
+                likeController.handleLikeClickAction(activity, post);
+            }
+
+            @Override
+            public void onAuthorClick(int position, View view) {
+                if (callback != null) {
+                    callback.onAuthorClick(getItemByPosition(position).getAuthorId(), view);
+                }
+            }
+        };
+
     }
 
     @Override
@@ -115,8 +190,8 @@ public class ProjectsAdapter extends BaseProjectsAdapter {
                     //change adapter contents
                     if (activity.hasInternetConnection()) {
                         isLoading = true;
-                        postList.add(new Post(ItemType.LOAD));
-                        notifyItemInserted(postList.size());
+                        //postList.add(new Post(ItemType.LOAD));
+                        //notifyItemInserted(postList.size());
                         loadProjectsNextPage(lastLoadedItemCreatedDate - 1);
                     } else {
                         mainActivity.showFloatButtonRelatedSnackBar(R.string.internet_connection_failed);
@@ -127,9 +202,27 @@ public class ProjectsAdapter extends BaseProjectsAdapter {
 
         }
 
-        if (getItemViewType(position) != ItemType.LOAD.getTypeCode()) {
-            ((ProjectsViewHolder) holder).bindData(postList.get(position));
+        if (getItemViewType(position) == TYPE_TEXT) {
+            ((ProjectsTextViewHolder) holder).bindData(postList.get(position));
         }
+
+        if (getItemViewType(position) == TYPE_IMAGE) {
+            ((ProjectsImageViewHolder) holder).bindData(postList.get(position));
+        }
+
+        if (getItemViewType(position) == TYPE_VIDEO) {
+            StorageReference videoRef = PostManager.getInstance(mainActivity.getApplicationContext()).getOriginImageStorageRef(postList.get(position).getImageTitle());
+            videoRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Log.i("mediauri","" + uri);
+                    ((ProjectsVideoViewHolder) holder).bind(uri);
+                    ((ProjectsVideoViewHolder) holder).bindData(postList.get(position));
+                }
+            });
+        }
+
+
     }
 
     private void addList(List<Post> list) {

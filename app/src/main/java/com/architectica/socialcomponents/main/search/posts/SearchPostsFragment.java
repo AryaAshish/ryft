@@ -173,19 +173,7 @@ public class SearchPostsFragment extends BaseFragment<SearchPostsView, SearchPos
         Intent intent = new Intent(getActivity(), PostDetailsActivity.class);
         intent.putExtra(PostDetailsActivity.POST_ID_EXTRA_KEY, post.getId());
         intent.putExtra(PostDetailsActivity.AUTHOR_ANIMATION_NEEDED_EXTRA_KEY, true);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
-            View imageView = v.findViewById(R.id.postImageView);
-
-            ActivityOptions options = ActivityOptions.
-                    makeSceneTransitionAnimation(getActivity(),
-                            new Pair<>(imageView, getString(R.string.post_image_transition_name))
-                    );
-            startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST, options.toBundle());
-        } else {
-            startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST);
-        }
+        startActivityForResult(intent, PostDetailsActivity.UPDATE_POST_REQUEST);
     }
 
     @Override

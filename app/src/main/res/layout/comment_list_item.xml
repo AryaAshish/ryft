@@ -5,9 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingBottom="@dimen/large_intrinsic_padding"
-    android:paddingTop="@dimen/large_intrinsic_padding">
+    android:paddingTop="@dimen/large_intrinsic_padding"
+    android:theme="@style/ProjectTheme">
 
-    <com.architectica.socialcomponents.views.CircularImageView
+    <com.architectica.socialcomponents.views.ProjectCircularImageView
         android:id="@+id/avatarImageView"
         android:layout_width="50dp"
         android:layout_height="50dp"

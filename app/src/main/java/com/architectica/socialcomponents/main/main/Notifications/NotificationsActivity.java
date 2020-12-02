@@ -11,6 +11,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SimpleItemAnimator;
+import im.ene.toro.widget.Container;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +38,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class NotificationsActivity extends BaseActivity<NotificationsView,NotificationsPresenter> implements NotificationsView{
 
     private NotificationsAdapter postsAdapter;
-    private RecyclerView recyclerView;
+    private Container recyclerView;
 
     private TextView newPostsCounterTextView;
     private boolean counterAnimationInProgress = false;

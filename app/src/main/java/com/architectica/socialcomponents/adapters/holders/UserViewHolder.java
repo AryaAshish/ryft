@@ -33,7 +33,7 @@ import com.architectica.socialcomponents.managers.listeners.OnObjectChangedListe
 import com.architectica.socialcomponents.managers.listeners.OnObjectChangedListenerSimple;
 import com.architectica.socialcomponents.model.Profile;
 import com.architectica.socialcomponents.utils.GlideApp;
-import com.architectica.socialcomponents.utils.ImageUtil;
+import com.architectica.socialcomponents.utils.ProjectImageUtil;
 import com.architectica.socialcomponents.views.FollowButton;
 
 /**
@@ -111,7 +111,7 @@ public class UserViewHolder extends RecyclerView.ViewHolder {
         }
 
         if (profile.getPhotoUrl() != null) {
-            ImageUtil.loadImage(GlideApp.with(activity), profile.getPhotoUrl(), photoImageView);
+            ProjectImageUtil.loadImage(GlideApp.with(activity), profile.getPhotoUrl(), photoImageView);
         }
     }
 

@@ -4,12 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/primary"
+    android:background="@color/primary_project"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:padding="@dimen/large_intrinsic_padding">
+    android:padding="@dimen/large_intrinsic_padding"
+    android:theme="@style/ProjectTheme">
 
-    <com.architectica.socialcomponents.views.CircularImageView
+    <com.architectica.socialcomponents.views.ProjectCircularImageView
         android:id="@+id/photoImageView"
         android:layout_width="@dimen/post_author_image_side"
         android:layout_height="@dimen/post_author_image_side"

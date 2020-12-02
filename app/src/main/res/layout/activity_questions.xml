@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".main.postDetails.QuestionsActivity">
+    tools:context=".main.postDetails.QuestionsActivity"
+    android:theme="@style/ProjectTheme">
 
     <LinearLayout
         android:id="@+id/questionsLayout"

@@ -14,7 +14,8 @@
     android:foreground="?attr/selectableItemBackgroundBorderless"
     card_view:cardBackgroundColor="@color/colorCardView"
     card_view:cardCornerRadius="@dimen/card_layout_corner_radius"
-    card_view:cardElevation="@dimen/card_layout_elevation">
+    card_view:cardElevation="@dimen/card_layout_elevation"
+    android:theme="@style/ProjectTheme">
 
     <RelativeLayout
         android:layout_width="match_parent"
