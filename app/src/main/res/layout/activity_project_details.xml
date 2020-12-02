@@ -172,7 +172,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:hint="github link"
+                android:hint="Take Test"
                 android:id="@+id/gitLink"
                 android:visibility="gone"/>
 

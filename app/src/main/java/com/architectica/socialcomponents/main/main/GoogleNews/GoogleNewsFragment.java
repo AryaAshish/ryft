@@ -33,7 +33,7 @@ public class GoogleNewsFragment extends Fragment {
     private List<Article> articles = new ArrayList<>();
     private NewsAdapter newsAdapter;
     //private String TAG = GoogleNewsActivity.class.getSimpleName();
-
+    String source="techcrunch";
     public static Fragment newInstance() {
 
         Fragment frag = new GoogleNewsFragment();
@@ -77,7 +77,7 @@ public class GoogleNewsFragment extends Fragment {
         String country = NewsUtils.getCountry();
 
         Call<News> call;
-        call = apiInterface.getNews(country,API_KEY);
+        call = apiInterface.getNews(source,API_KEY);
 
         call.enqueue(new Callback<News>() {
             @Override
